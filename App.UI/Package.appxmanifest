@@ -34,8 +34,8 @@
       Executable="$targetnametoken$.exe"
       EntryPoint="$targetentrypoint$">
       <uap:VisualElements
-        DisplayName="App.UI"
-        Description="App.UI"
+        DisplayName="JpegViewer"
+        Description="JpegViewer is a lightweight desktop application that displays JPEG images from a selected folder in a simple, fast, and user-friendly interface. It’s designed for quick browsing and viewing of photos without the overhead of full-featured photo-management software."
         BackgroundColor="transparent"
         Square150x150Logo="Assets\Square150x150Logo.png"
         Square44x44Logo="Assets\Square44x44Logo.png">
