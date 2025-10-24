@@ -1,23 +1,10 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Runtime.InteropServices.WindowsRuntime;
+using JpegViewer.App.Core.Interfaces;
+using JpegViewer.App.UI.Services;
+using JpegViewer.App.Vmd;
+using JpegViewer.App.Vmd.Controls;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.UI.Xaml;
-using Microsoft.UI.Xaml.Controls;
-using Microsoft.UI.Xaml.Controls.Primitives;
-using Microsoft.UI.Xaml.Data;
-using Microsoft.UI.Xaml.Input;
-using Microsoft.UI.Xaml.Media;
-using Microsoft.UI.Xaml.Navigation;
-using Microsoft.UI.Xaml.Shapes;
-using Windows.ApplicationModel;
-using Windows.ApplicationModel.Activation;
-using Windows.Foundation;
-using Windows.Foundation.Collections;
-
-// To learn more about WinUI, the WinUI project structure,
-// and more about our project templates, see: http://aka.ms/winui-project-info.
 
 namespace JpegViewer.App.UI
 {
@@ -29,22 +16,49 @@ namespace JpegViewer.App.UI
         private Window? _window;
 
         /// <summary>
+        /// Holds the service provider for dependency injection.
+        /// </summary>
+        public IServiceProvider Services { get; }
+
+        /// <summary>
         /// Initializes the singleton application object.  This is the first line of authored code
         /// executed, and as such is the logical equivalent of main() or WinMain().
         /// </summary>
         public App()
         {
             InitializeComponent();
+
+            // Setup dependency injection regarding viewmodels
+            var services = new ServiceCollection();
+            services.AddSingleton<VmdMainWindow>();
+            services.AddSingleton<VmdCtrlFolderPicker>();
+            services.AddSingleton<VmdCtrlPhoto>();
+            services.AddSingleton<VmdCtrlTimeline>();
+            services.AddSingleton<IDispatcherService, DispatcherService>();
+            Services = services.BuildServiceProvider();
         }
 
         /// <summary>
         /// Invoked when the application is launched.
         /// </summary>
         /// <param name="args">Details about the launch request and process.</param>
-        protected override void OnLaunched(Microsoft.UI.Xaml.LaunchActivatedEventArgs args)
+        protected override void OnLaunched(LaunchActivatedEventArgs args)
         {
             _window = new MainWindow();
             _window.Activate();
+        }
+
+        /// <summary>
+        /// Retrieves a service of the specified type from the application's service provider.
+        /// </summary>
+        public static T GetService<T>() where T : class
+        {
+            if ((Current as App)!.Services.GetService(typeof(T)) is not T service)
+            {
+                throw new ArgumentException($"{typeof(T)} needs to be registered in App constructor within App.xaml.cs.");
+            }
+
+            return service;
         }
     }
 }

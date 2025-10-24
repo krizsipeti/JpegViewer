@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<UserControl
+    x:Class="JpegViewer.App.UI.Controls.CtrlFolderPicker"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:i="using:Microsoft.Xaml.Interactivity"
+    mc:Ignorable="d">
+    
+    <Grid x:Name="root">
+        <Border BorderBrush="Red" BorderThickness="2">
+            <StackPanel Orientation="Vertical">
+                <TextBlock Text="Select a folder" FontSize="32" Foreground="Green" HorizontalAlignment="Left"/>
+                <TreeView ItemsSource="{Binding Folders}"/>
+            </StackPanel>
+        </Border>
+
+        <i:Interaction.Behaviors>
+            <i:EventTriggerBehavior EventName="Loaded">
+                <i:InvokeCommandAction Command="{Binding LoadedCommand}"/>
+            </i:EventTriggerBehavior>
+        </i:Interaction.Behaviors>
+    </Grid>
+</UserControl>

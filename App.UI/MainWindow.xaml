@@ -6,6 +6,7 @@
     xmlns:local="using:JpegViewer.App.UI"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:control="using:JpegViewer.App.UI.Controls"
     mc:Ignorable="d"
     Title="JpegViewer">
 
@@ -13,7 +14,18 @@
         <MicaBackdrop />
     </Window.SystemBackdrop>
 
-    <Grid>
+    <Grid x:Name="root">
+        <Grid.RowDefinitions>            
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="Auto"/>
+            <ColumnDefinition Width="*"/>
+        </Grid.ColumnDefinitions>
 
+        <control:CtrlFolderPicker x:Name="folderPicker"/>
+        <control:CtrlPhoto x:Name="photoViewer" Grid.Column="1"/>
+        <control:CtrlTimeline x:Name="timeline" Grid.ColumnSpan="2" Grid.Row="1"/>
     </Grid>
 </Window>
