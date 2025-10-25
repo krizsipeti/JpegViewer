@@ -8,12 +8,7 @@
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     mc:Ignorable="d">
 
-    <Grid x:Name="root">
-        <Border BorderBrush="Blue" BorderThickness="2">
-            <StackPanel Orientation="Vertical">
-                <TextBlock Text="Timeline" FontSize="32" Foreground="Blue" HorizontalAlignment="Left"/>
-                <ListBox x:Name="timelineList" Height="200"/>
-            </StackPanel>
-        </Border>
+    <Grid x:Name="root" Background="#2C2E2F">
+        <TextBlock Text="Timeline" FontSize="32" HorizontalAlignment="Right"/>
     </Grid>
 </UserControl>

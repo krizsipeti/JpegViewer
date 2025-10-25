@@ -6,15 +6,43 @@
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:i="using:Microsoft.Xaml.Interactivity"
+    xmlns:ct="using:JpegViewer.App.Core.Types"
+    xmlns:support="using:JpegViewer.App.UI.Support"
     mc:Ignorable="d">
-    
-    <Grid x:Name="root">
-        <Border BorderBrush="Red" BorderThickness="2">
-            <StackPanel Orientation="Vertical">
-                <TextBlock Text="Select a folder" FontSize="32" Foreground="Green" HorizontalAlignment="Left"/>
-                <TreeView ItemsSource="{Binding Folders}"/>
-            </StackPanel>
-        </Border>
+
+    <UserControl.Resources>
+        <support:EnumToGlyphConverter x:Key="EnumToGlyphConverter"/>
+        <DataTemplate x:Key="FolderPickerItemTemplate">
+            <TreeViewItem ItemsSource="{Binding Childs}"
+                          AutomationProperties.Name="{Binding Name}"
+                          IsExpanded="{Binding IsExpanded, Mode=TwoWay}"
+                          PointerEntered="TreeViewItem_PointerEntered"
+                          PointerExited="TreeViewItem_PointerExited">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+                    <FontIcon FontFamily="Segoe Fluent Icons" Glyph="{Binding ItemIcon, Converter={StaticResource EnumToGlyphConverter}}" HorizontalAlignment="Left"/>
+                    <TextBlock Grid.Column="1" Margin="4 2 0 0" Text="{Binding Name}"/>
+                </Grid>
+            </TreeViewItem>
+        </DataTemplate>
+    </UserControl.Resources>
+
+    <Grid x:Name="root" Background="#2C2E2F">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+        
+        <TextBlock Text="Select a folder" FontSize="32" HorizontalAlignment="Left"/>
+        <TreeView Grid.Row="1"
+                  ItemsSource="{Binding Folders}"
+                  ItemTemplate="{StaticResource FolderPickerItemTemplate}"
+                  CanDragItems="False"
+                  CanDrag="False"
+                  AllowDrop="False"/>
 
         <i:Interaction.Behaviors>
             <i:EventTriggerBehavior EventName="Loaded">
