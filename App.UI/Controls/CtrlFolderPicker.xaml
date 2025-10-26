@@ -11,11 +11,21 @@
     mc:Ignorable="d">
 
     <UserControl.Resources>
+        <SolidColorBrush x:Key="TreeViewItemSelectionIndicatorForeground" Color="Red"/>
+        <SolidColorBrush x:Key="TreeViewItemSelectionIndicatorForegroundPointerOver" Color="Red"/>
+        <SolidColorBrush x:Key="TreeViewItemSelectionIndicatorForegroundPressed" Color="Red"/>
+        <SolidColorBrush x:Key="TreeViewItemForeground" Color="#9EA0A2"/>
+        <SolidColorBrush x:Key="TreeViewItemForegroundSelected" Color="#9EA0A2"/>
+        <SolidColorBrush x:Key="TreeViewItemForegroundPointerOver" Color="#9EA0A2"/>
+        <SolidColorBrush x:Key="TreeViewItemForegroundSelectedPointerOver" Color="#9EA0A2"/>
+        <SolidColorBrush x:Key="TreeViewItemForegroundPressed" Color="#9EA0A2"/>
+        <SolidColorBrush x:Key="TreeViewItemForegroundSelectedPressed" Color="#9EA0A2"/>
         <support:EnumToGlyphConverter x:Key="EnumToGlyphConverter"/>
         <DataTemplate x:Key="FolderPickerItemTemplate">
             <TreeViewItem ItemsSource="{Binding Childs}"
                           AutomationProperties.Name="{Binding Name}"
                           IsExpanded="{Binding IsExpanded, Mode=TwoWay}"
+                          IsSelected="{Binding IsSelected, Mode=TwoWay}"
                           PointerEntered="TreeViewItem_PointerEntered"
                           PointerExited="TreeViewItem_PointerExited">
                 <Grid>
@@ -24,7 +34,16 @@
                         <ColumnDefinition Width="*"/>
                     </Grid.ColumnDefinitions>
                     <FontIcon FontFamily="Segoe Fluent Icons" Glyph="{Binding ItemIcon, Converter={StaticResource EnumToGlyphConverter}}" HorizontalAlignment="Left"/>
-                    <TextBlock Grid.Column="1" Margin="4 2 0 0" Text="{Binding Name}"/>
+                    <TextBlock Grid.Column="1" Margin="4 2 0 0" Text="{Binding Name}">
+                        <i:Interaction.Behaviors>
+                            <i:DataTriggerBehavior Binding="{Binding IsSelected}" Value="True">
+                                <i:ChangePropertyAction PropertyName="Foreground" Value="Red"/>
+                            </i:DataTriggerBehavior>
+                            <i:DataTriggerBehavior Binding="{Binding IsSelected}" Value="False">
+                                <i:ChangePropertyAction PropertyName="Foreground" Value="#F2F3F3"/>
+                            </i:DataTriggerBehavior>
+                        </i:Interaction.Behaviors>
+                    </TextBlock>
                 </Grid>
             </TreeViewItem>
         </DataTemplate>

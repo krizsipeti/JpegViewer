@@ -15,6 +15,7 @@ namespace JpegViewer.App.Core.Models
 
         private string _name = string.Empty;
         private bool _isExpanded = false;
+        private bool _isSelected = false;
         private EFolderPickerItemType _itemType;
 
         #endregion Fields
@@ -47,6 +48,15 @@ namespace JpegViewer.App.Core.Models
                     OnPropertyChanged(nameof(ItemIcon));
                 }
             }
+        }
+
+        /// <summary>
+        /// True if the folder item is selected.
+        /// </summary>
+        public bool IsSelected
+        {
+            get => _isSelected;
+            set => SetProperty(ref _isSelected, value);
         }
 
         /// <summary>
