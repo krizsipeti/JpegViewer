@@ -32,8 +32,8 @@ namespace JpegViewer.App.Vmd.Controls
             get => _itemsWidth;
             set
             {
-                // Minimum width of MinItemsWidth to prevent excessive zooming out
-                if (value >= MinItemsWidth)
+                // Minimum and maximum width constraints
+                if (value >= MinItemsWidth && MaxItemsWidth >= value) 
                 {
                     SetProperty(ref _itemsWidth, value);
                 }
@@ -44,6 +44,11 @@ namespace JpegViewer.App.Vmd.Controls
         /// The minimum width allowed for the timeline items.
         /// </summary>
         public double MinItemsWidth => 1000;
+
+        /// <summary>
+        /// The maximum width allowed for the timeline items.
+        /// </summary>
+        public double MaxItemsWidth => 2000;
 
         /// <summary>
         /// The current zoom level of the timeline.

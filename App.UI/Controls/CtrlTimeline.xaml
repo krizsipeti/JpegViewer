@@ -6,9 +6,11 @@
     xmlns:local="using:JpegViewer.App.UI.Controls"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:i="using:Microsoft.Xaml.Interactivity"
     xmlns:vms="using:JpegViewer.App.Vmd.Controls"
     xmlns:models="using:JpegViewer.App.Core.Models"
     xmlns:support="using:JpegViewer.App.UI.Support"
+    xmlns:types="using:JpegViewer.App.Core.Types"
     mc:Ignorable="d"
     Height="300">
 
@@ -28,13 +30,17 @@
             <Setter Property="Grid.Row" Value="1"/>
         </Style>
         <Style TargetType="Rectangle" x:Name="RectB">
-            <Setter Property="Fill" Value="#1E1F23"/>
+            <Setter Property="Fill" Value="#1F2024"/>
             <Setter Property="Grid.RowSpan" Value="2"/>
             <Setter Property="Grid.Row" Value="1"/>
         </Style>
 
         <DataTemplate x:Name="TimelineItemTemplateYear" x:DataType="models:TimelineItem">
-            <Grid MinWidth="{Binding DataContext.MinItemsWidth, ElementName=itemsRepeater}" Width="{Binding DataContext.ItemsWidth, ElementName=itemsRepeater}">
+            <Grid MinWidth="{Binding DataContext.MinItemsWidth, ElementName=itemsRepeater}" Width="{Binding DataContext.ItemsWidth, ElementName=itemsRepeater}"
+                  PointerPressed="Item_PointerPressed"
+                  PointerMoved="Item_PointerMoved"
+                  PointerReleased="Item_PointerReleased"
+                  PointerCanceled="Item_PointerCanceled">
                 <Grid.RowDefinitions>
                     <RowDefinition Height="Auto"/>
                     <RowDefinition Height="Auto"/>
@@ -53,7 +59,7 @@
                     <ColumnDefinition Width="*"/>
                 </Grid.ColumnDefinitions>
 
-                <Rectangle Grid.ColumnSpan="10" Fill="#1E1F23"/>
+                <Rectangle Grid.ColumnSpan="10" Fill="#202124"/>
                 <TextBlock Grid.Row="0" Grid.ColumnSpan="10" Margin="8 4 0 4" HorizontalAlignment="Left" Text="{x:Bind support:StringFormatter.YearRange(Date.Year, 10)}"/>
                 <Border Grid.ColumnSpan="10" BorderThickness="2" BorderBrush="#26272B" VerticalAlignment="Bottom"/>
 
@@ -77,12 +83,16 @@
                 <TextBlock Grid.Column="8" Text="{x:Bind support:StringFormatter.IncreaseByN(Date.Year, 8)}"/>
                 <Rectangle Grid.Column="9" Style="{StaticResource RectB}"/>
                 <TextBlock Grid.Column="9" Text="{x:Bind support:StringFormatter.IncreaseByN(Date.Year, 9)}"/>
-                <Border BorderThickness="1" BorderBrush="#26272B" HorizontalAlignment="Left"/>
+                <Border Grid.RowSpan="3" BorderThickness="1" BorderBrush="#26272B" HorizontalAlignment="Left"/>
             </Grid>
         </DataTemplate>
 
         <DataTemplate x:Name="TimelineItemTemplateMonth" x:DataType="models:TimelineItem">
-            <Grid MinWidth="{Binding DataContext.MinItemsWidth, ElementName=itemsRepeater}" Width="{Binding DataContext.ItemsWidth, ElementName=itemsRepeater}">
+            <Grid MinWidth="{Binding DataContext.MinItemsWidth, ElementName=itemsRepeater}" Width="{Binding DataContext.ItemsWidth, ElementName=itemsRepeater}"
+                  PointerPressed="Item_PointerPressed"
+                  PointerMoved="Item_PointerMoved"
+                  PointerReleased="Item_PointerReleased"
+                  PointerCanceled="Item_PointerCanceled">
                 <Grid.RowDefinitions>
                     <RowDefinition Height="Auto"/>
                     <RowDefinition Height="Auto"/>
@@ -103,7 +113,7 @@
                     <ColumnDefinition Width="*"/>
                 </Grid.ColumnDefinitions>
 
-                <Rectangle Grid.ColumnSpan="12" Fill="#1E1F23"/>
+                <Rectangle Grid.ColumnSpan="12" Fill="#202124"/>
                 <TextBlock Grid.Row="0" Grid.ColumnSpan="10" Margin="8 4 0 4" HorizontalAlignment="Left" Text="{x:Bind Date.Year}"/>
                 <Border Grid.ColumnSpan="12" BorderThickness="2" BorderBrush="#26272B" VerticalAlignment="Bottom"/>
 
@@ -131,10 +141,11 @@
                 <TextBlock Grid.Column="10" Text="November"/>
                 <Rectangle Grid.Column="11" Style="{StaticResource RectB}"/>
                 <TextBlock Grid.Column="11" Text="December"/>
-                <Border BorderThickness="1" BorderBrush="#26272B" HorizontalAlignment="Left"/>
+                <Border Grid.RowSpan="3" BorderThickness="1" BorderBrush="#26272B" HorizontalAlignment="Left"/>
             </Grid>
         </DataTemplate>
 
+        <support:EnumStringEqualsConverter x:Key="EnumStringEqualsConverter"/>
         <StackLayout x:Key="HorizontalStackLayout" Orientation="Horizontal"/>
     </UserControl.Resources>
 
@@ -155,9 +166,17 @@
                       IsVerticalScrollChainingEnabled="False">
             <ItemsRepeater x:Name="itemsRepeater"
                            ItemsSource="{Binding Items}"
-                           ItemTemplate="{StaticResource TimelineItemTemplateMonth}"
                            Layout="{StaticResource HorizontalStackLayout}"
-                           PointerWheelChanged="ItemsRepeater_PointerWheelChanged"/>
+                           PointerWheelChanged="ItemsRepeater_PointerWheelChanged">
+                <i:Interaction.Behaviors>
+                    <i:DataTriggerBehavior Binding="{Binding ZoomLevel, Converter={StaticResource EnumStringEqualsConverter}, ConverterParameter=Years}" Value="True">
+                        <i:ChangePropertyAction PropertyName="ItemTemplate" Value="{StaticResource TimelineItemTemplateYear}"/>
+                    </i:DataTriggerBehavior>
+                    <i:DataTriggerBehavior Binding="{Binding ZoomLevel, Converter={StaticResource EnumStringEqualsConverter}, ConverterParameter=Months}" Value="True">
+                        <i:ChangePropertyAction PropertyName="ItemTemplate" Value="{StaticResource TimelineItemTemplateMonth}"/>
+                    </i:DataTriggerBehavior>
+                </i:Interaction.Behaviors>
+            </ItemsRepeater>
         </ScrollViewer>
         
         <Border Grid.Row="2"

@@ -1,14 +1,11 @@
 using System;
-using System.Drawing;
+using JpegViewer.App.Core.Types;
 using JpegViewer.App.Vmd.Controls;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Input;
 using Microsoft.UI.Xaml.Media;
-using Microsoft.UI.Xaml.Media.Animation;
-using Windows.Foundation;
 using Windows.System;
-using Windows.UI.Core;
 
 namespace JpegViewer.App.UI.Controls
 {
@@ -17,6 +14,36 @@ namespace JpegViewer.App.UI.Controls
     /// </summary>
     public sealed partial class CtrlTimeline : UserControl
     {
+        /// <summary>
+        /// True if dragging is in action, false otherwise.
+        /// </summary>
+        private bool IsDragging { get; set; } = false;
+
+        /// <summary>
+        /// Holds the start offset for dragging.
+        /// </summary>
+        private double StartOffset { get; set; }
+
+        /// <summary>
+        /// Holds the start X coordinate of dragging action.
+        /// </summary>
+        private double StartPointerX { get; set; }
+
+        /// <summary>
+        /// The last X coordinate during dragging action.
+        /// </summary>
+        private double LastPointerX { get; set; }
+
+        /// <summary>
+        /// Speed of scrolling in pixels per millisecond.
+        /// </summary>
+        private double Velocity { get; set; }
+
+        /// <summary>
+        /// Holds a previous time point where dragging happened.
+        /// </summary>
+        private DateTime LastTime { get; set; }
+
         /// <summary>
         /// Scale transform for zooming the timeline content.
         /// </summary>
@@ -38,66 +65,40 @@ namespace JpegViewer.App.UI.Controls
         /// </summary>
         private void ItemsRepeater_PointerWheelChanged(object sender, PointerRoutedEventArgs e)
         {
-            //ScrollViewer? scrollViewer = (sender as ItemsRepeater)?.Parent as ScrollViewer;
-            //if (scrollViewer == null)
-            //{
-            //    return;
-            //}
-
+            // First get delta value from mouse wheel
             int delta = e.GetCurrentPoint(null).Properties.MouseWheelDelta; // ±120 per notch
 
+            // Zoom in/out if Ctrl is pressed, otherwise scroll horizontally
             if (e.KeyModifiers == VirtualKeyModifiers.Control)
             {
-                //scrollViewer.RenderTransform = ScaleTransform;
-                //
-                //// Zooming behavior could be implemented here if needed
-                //// Zoom: prefer a ScaleTransform on content for smooth, layout-free zooming
+                VmdCtrlTimeline vmdCtrlTimeline = (VmdCtrlTimeline)DataContext;
+                if (vmdCtrlTimeline == null)
+                {
+                    return;
+                }
+
                 double zoomStep = 100; // adjust sensitivity
                 double change = (delta > 0) ? zoomStep : -zoomStep;
-                //
-                //// Example using a ScaleTransform named "contentScale"
-                //double newScale = Math.Clamp(ScaleTransform.ScaleX + change, 0.5, 3.0);
-                //ScaleTransform.ScaleX = newScale;
-                ////ScaleTransform.ScaleY = newScale;
-                //
-                //// If using ScrollViewer's zoom (if supported), use ChangeView with zoomFactor:
-                //// scrollViewer.ChangeView(null, null, (float)newZoomFactor, disableAnimation: false);
-
-                ((VmdCtrlTimeline)DataContext)!.ItemsWidth += change;
-
-                //// viewport rectangle in ScrollViewer coordinates
-                //var viewport = new Rectangle(0, 0, (int)scrollViewer.ViewportWidth, (int)scrollViewer.ViewportHeight);
-                //
-                //int count = itemsRepeater.ItemsSourceView?.Count ?? 0;
-                //for (int i = 0; i < count; i++)
-                //{
-                //    if (!(itemsRepeater.TryGetElement(i) is FrameworkElement element))
-                //        continue;
-                //
-                //    // element bounds relative to ScrollViewer
-                //    GeneralTransform gt = element.TransformToVisual(scrollViewer);
-                //    Rect elemRect = gt.TransformBounds(new Rect(0, 0, element.ActualWidth, element.ActualHeight));
-                //    Rectangle rc = new Rectangle((int)elemRect.X, (int)elemRect.Y, (int)elemRect.Width, (int)elemRect.Height);
-                //
-                //    // check intersection (visible on screen)
-                //    if (!rc.IntersectsWith(viewport))
-                //        continue;
-                //
-                //    // animate Width
-                //    //element.CancelAnimations();
-                //    var da = new DoubleAnimation
-                //    {
-                //        To = ((VmdCtrlTimeline)DataContext)!.ItemsWidth + 100,
-                //        Duration = TimeSpan.FromMilliseconds(500),
-                //        EasingFunction = new ExponentialEase { EasingMode = EasingMode.EaseOut }
-                //    };
-                //    var sb = new Storyboard();
-                //    sb.Children.Add(da);
-                //    Storyboard.SetTarget(da, element);
-                //    Storyboard.SetTargetProperty(da, "Width");
-                //    sb.Begin();
-                //    break;
-                //}
+                if (vmdCtrlTimeline.ItemsWidth + change > vmdCtrlTimeline.MaxItemsWidth)
+                {
+                    if (vmdCtrlTimeline.ZoomLevel == ETimelineZoomLevel.Years)
+                    {
+                        vmdCtrlTimeline.ItemsWidth = vmdCtrlTimeline.MinItemsWidth;
+                        vmdCtrlTimeline.ZoomLevel = ETimelineZoomLevel.Months;
+                    }
+                }
+                else if (vmdCtrlTimeline.ItemsWidth + change < vmdCtrlTimeline.MinItemsWidth)
+                {
+                    if (vmdCtrlTimeline.ZoomLevel == ETimelineZoomLevel.Months)
+                    {
+                        vmdCtrlTimeline.ItemsWidth = vmdCtrlTimeline.MaxItemsWidth;
+                        vmdCtrlTimeline.ZoomLevel = ETimelineZoomLevel.Years;
+                    }
+                }
+                else
+                {
+                    vmdCtrlTimeline.ItemsWidth += change;
+                }
             }
             else
             {
@@ -107,6 +108,124 @@ namespace JpegViewer.App.UI.Controls
                 scrollViewer.ChangeView(scrollViewer.HorizontalOffset + scrollAmount, null, null, disableAnimation: false);
             }
 
+            e.Handled = true;
+        }
+
+        /// <summary>
+        /// Called when pointer is pressed, starts dragging.
+        /// </summary>
+        private void Item_PointerPressed(object sender, PointerRoutedEventArgs e)
+        {
+            var pt = e.GetCurrentPoint(scrollViewer);
+            if (pt.Properties.IsLeftButtonPressed)
+            {
+                IsDragging = true;
+                StartPointerX = pt.Position.X;
+                StartOffset = scrollViewer.HorizontalOffset;
+                LastPointerX = StartPointerX;
+                LastTime = DateTime.UtcNow;
+                Velocity = 0;
+
+                UIElement? uiSender = sender as UIElement;
+                if (uiSender != null)
+                {
+                    uiSender.CapturePointer(e.Pointer);
+                }
+                e.Handled = true;
+            }
+        }
+
+        /// <summary>
+        /// Called when pointer is moved, updates scrolling if dragging.
+        /// </summary>
+        private void Item_PointerMoved(object sender, PointerRoutedEventArgs e)
+        {
+            if (!IsDragging)
+            {
+                return;
+            }
+
+            var pt = e.GetCurrentPoint(scrollViewer);
+            var currentX = pt.Position.X;
+            var now = DateTime.UtcNow;
+            var dt = (now - LastTime).TotalMilliseconds;
+            if (dt > 0)
+            {
+                Velocity = (currentX - LastPointerX) / dt; // px per ms
+            }
+
+            var delta = StartPointerX - currentX; // move opposite to pointer
+            var newOffset = StartOffset + delta;
+            scrollViewer.ChangeView(newOffset, null, null, true);
+            LastPointerX = currentX;
+            LastTime = now;
+            e.Handled = true;
+        }
+
+        /// <summary>
+        /// Called when pointer is released, ends dragging.
+        /// </summary>
+        private void Item_PointerReleased(object sender, PointerRoutedEventArgs e)
+        {
+            if (!IsDragging)
+            {
+                return;
+            }
+            EndDrag(sender, e);
+        }
+
+        /// <summary>
+        /// Called when pointer capture is canceled, ends dragging.
+        /// </summary>
+        private void Item_PointerCanceled(object sender, PointerRoutedEventArgs e)
+        {
+            if (!IsDragging)
+            {
+                return;
+            }
+            EndDrag(sender, e);
+        }
+
+        /// <summary>
+        /// Stops the dragging action and applies inertia based on the last recorded velocity.
+        /// </summary>
+        private void EndDrag(object sender, PointerRoutedEventArgs e)
+        {
+            IsDragging = false;
+            UIElement? uiSender = sender as UIElement;
+            if (uiSender != null)
+            {
+                uiSender.ReleasePointerCaptures();
+            }
+
+            // Apply simple inertia: continue scrolling based on velocity, decelerate
+            const double deceleration = 0.0025; // px/ms^2
+            double v = Velocity; // px/ms
+            if (Math.Abs(v) < 0.01)
+            {
+                return;
+            }
+
+            // compute target offset with simple exponential decay/integration
+            // s = v^2 / (2*a)
+            double sign = Math.Sign(v);
+            double stoppingDistance = (v * v) / (2 * deceleration);
+            double target = scrollViewer.HorizontalOffset - sign * stoppingDistance;
+
+            // clamp target within scrollable range
+            var maxOffset = scrollViewer.ExtentWidth - scrollViewer.ViewportWidth;
+            if (target < 0)
+            {
+                target = 0;
+            }
+
+            if (target > maxOffset)
+            {
+                target = maxOffset;
+            }
+
+            // use ChangeView with animation (true). The duration isn't directly controllable here.
+            scrollViewer.ChangeView(target, null, null, true);
             e.Handled = true;
         }
     }
