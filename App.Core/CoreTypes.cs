@@ -26,4 +26,17 @@ namespace JpegViewer.App.Core.Types
     /// </summary>
     /// <param name="ExpandedItem"></param>
     public record FolderPickerItemExpandedMessage(FolderPickerItem ExpandedItem);
+
+    /// <summary>
+    /// Possible zoom levels for the timeline control.
+    /// </summary>
+    public enum ETimelineZoomLevel
+    {
+        Years,
+        Months,
+        Weeks,
+        Days,
+        Hours,
+        Minutes
+    }
 }

@@ -21,6 +21,7 @@
             <RowDefinition Height="*"/>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
+            <RowDefinition Height="20"/>
         </Grid.RowDefinitions>
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="Auto"/>
@@ -35,5 +36,7 @@
         <control:CtrlPhoto x:Name="photoViewer" Grid.Row="2" Grid.Column="2"/>
         <Border Grid.Row="3" Grid.ColumnSpan="3"/>
         <control:CtrlTimeline x:Name="timeline" Grid.Row="4" Grid.ColumnSpan="3"/>
+        <Rectangle Grid.Row="5" Grid.ColumnSpan="3" Fill="#2C2E2F"/>
+        <Border Grid.Row="5" Grid.ColumnSpan="3" BorderThickness="1" VerticalAlignment="Top"/>
     </Grid>
 </Window>

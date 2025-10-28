@@ -6,9 +6,163 @@
     xmlns:local="using:JpegViewer.App.UI.Controls"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-    mc:Ignorable="d">
+    xmlns:vms="using:JpegViewer.App.Vmd.Controls"
+    xmlns:models="using:JpegViewer.App.Core.Models"
+    xmlns:support="using:JpegViewer.App.UI.Support"
+    mc:Ignorable="d"
+    Height="300">
+
+    <UserControl.Resources>
+        <Style TargetType="TextBlock">
+            <Setter Property="Margin" Value="0 4 0 4"/>
+            <Setter Property="Grid.Row" Value="1"/>
+            <Setter Property="HorizontalTextAlignment" Value="Center"/>
+            <Setter Property="Foreground" Value="#9EA0A2"/>
+            <Setter Property="FontFamily" Value="Segoe UI Variable"/>
+            <Setter Property="FontSize" Value="13.5"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
+        </Style>
+        <Style TargetType="Rectangle" x:Name="RectA">
+            <Setter Property="Fill" Value="#202124"/>
+            <Setter Property="Grid.RowSpan" Value="2"/>
+            <Setter Property="Grid.Row" Value="1"/>
+        </Style>
+        <Style TargetType="Rectangle" x:Name="RectB">
+            <Setter Property="Fill" Value="#1E1F23"/>
+            <Setter Property="Grid.RowSpan" Value="2"/>
+            <Setter Property="Grid.Row" Value="1"/>
+        </Style>
+
+        <DataTemplate x:Name="TimelineItemTemplateYear" x:DataType="models:TimelineItem">
+            <Grid MinWidth="{Binding DataContext.MinItemsWidth, ElementName=itemsRepeater}" Width="{Binding DataContext.ItemsWidth, ElementName=itemsRepeater}">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="*"/>
+                </Grid.RowDefinitions>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
+
+                <Rectangle Grid.ColumnSpan="10" Fill="#1E1F23"/>
+                <TextBlock Grid.Row="0" Grid.ColumnSpan="10" Margin="8 4 0 4" HorizontalAlignment="Left" Text="{x:Bind support:StringFormatter.YearRange(Date.Year, 10)}"/>
+                <Border Grid.ColumnSpan="10" BorderThickness="2" BorderBrush="#26272B" VerticalAlignment="Bottom"/>
+
+                <Rectangle Style="{StaticResource RectA}"/>
+                <TextBlock Text="{x:Bind Date.Year}"/>
+                <Rectangle Grid.Column="1" Style="{StaticResource RectB}"/>
+                <TextBlock Grid.Column="1" Text="{x:Bind support:StringFormatter.IncreaseByN(Date.Year, 1)}"/>
+                <Rectangle Grid.Column="2" Style="{StaticResource RectA}"/>
+                <TextBlock Grid.Column="2" Text="{x:Bind support:StringFormatter.IncreaseByN(Date.Year, 2)}"/>
+                <Rectangle Grid.Column="3" Style="{StaticResource RectB}"/>
+                <TextBlock Grid.Column="3" Text="{x:Bind support:StringFormatter.IncreaseByN(Date.Year, 3)}"/>
+                <Rectangle Grid.Column="4" Style="{StaticResource RectA}"/>
+                <TextBlock Grid.Column="4" Text="{x:Bind support:StringFormatter.IncreaseByN(Date.Year, 4)}"/>
+                <Rectangle Grid.Column="5" Style="{StaticResource RectB}"/>
+                <TextBlock Grid.Column="5" Text="{x:Bind support:StringFormatter.IncreaseByN(Date.Year, 5)}"/>
+                <Rectangle Grid.Column="6" Style="{StaticResource RectA}"/>
+                <TextBlock Grid.Column="6" Text="{x:Bind support:StringFormatter.IncreaseByN(Date.Year, 6)}"/>
+                <Rectangle Grid.Column="7" Style="{StaticResource RectB}"/>
+                <TextBlock Grid.Column="7" Text="{x:Bind support:StringFormatter.IncreaseByN(Date.Year, 7)}"/>
+                <Rectangle Grid.Column="8" Style="{StaticResource RectA}"/>
+                <TextBlock Grid.Column="8" Text="{x:Bind support:StringFormatter.IncreaseByN(Date.Year, 8)}"/>
+                <Rectangle Grid.Column="9" Style="{StaticResource RectB}"/>
+                <TextBlock Grid.Column="9" Text="{x:Bind support:StringFormatter.IncreaseByN(Date.Year, 9)}"/>
+                <Border BorderThickness="1" BorderBrush="#26272B" HorizontalAlignment="Left"/>
+            </Grid>
+        </DataTemplate>
+
+        <DataTemplate x:Name="TimelineItemTemplateMonth" x:DataType="models:TimelineItem">
+            <Grid MinWidth="{Binding DataContext.MinItemsWidth, ElementName=itemsRepeater}" Width="{Binding DataContext.ItemsWidth, ElementName=itemsRepeater}">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="*"/>
+                </Grid.RowDefinitions>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
+
+                <Rectangle Grid.ColumnSpan="12" Fill="#1E1F23"/>
+                <TextBlock Grid.Row="0" Grid.ColumnSpan="10" Margin="8 4 0 4" HorizontalAlignment="Left" Text="{x:Bind Date.Year}"/>
+                <Border Grid.ColumnSpan="12" BorderThickness="2" BorderBrush="#26272B" VerticalAlignment="Bottom"/>
+
+                <Rectangle Style="{StaticResource RectA}"/>
+                <TextBlock Text="January"/>
+                <Rectangle Grid.Column="1" Style="{StaticResource RectB}"/>
+                <TextBlock Grid.Column="1" Text="February"/>
+                <Rectangle Grid.Column="2" Style="{StaticResource RectA}"/>
+                <TextBlock Grid.Column="2" Text="March"/>
+                <Rectangle Grid.Column="3" Style="{StaticResource RectB}"/>
+                <TextBlock Grid.Column="3" Text="April"/>
+                <Rectangle Grid.Column="4" Style="{StaticResource RectA}"/>
+                <TextBlock Grid.Column="4" Text="May"/>
+                <Rectangle Grid.Column="5" Style="{StaticResource RectB}"/>
+                <TextBlock Grid.Column="5" Text="June"/>
+                <Rectangle Grid.Column="6" Style="{StaticResource RectA}"/>
+                <TextBlock Grid.Column="6" Text="July"/>
+                <Rectangle Grid.Column="7" Style="{StaticResource RectB}"/>
+                <TextBlock Grid.Column="7" Text="August"/>
+                <Rectangle Grid.Column="8" Style="{StaticResource RectA}"/>
+                <TextBlock Grid.Column="8" Text="September"/>
+                <Rectangle Grid.Column="9" Style="{StaticResource RectB}"/>
+                <TextBlock Grid.Column="9" Text="October"/>
+                <Rectangle Grid.Column="10" Style="{StaticResource RectA}"/>
+                <TextBlock Grid.Column="10" Text="November"/>
+                <Rectangle Grid.Column="11" Style="{StaticResource RectB}"/>
+                <TextBlock Grid.Column="11" Text="December"/>
+                <Border BorderThickness="1" BorderBrush="#26272B" HorizontalAlignment="Left"/>
+            </Grid>
+        </DataTemplate>
+
+        <StackLayout x:Key="HorizontalStackLayout" Orientation="Horizontal"/>
+    </UserControl.Resources>
 
     <Grid x:Name="root" Background="#2C2E2F">
-        <TextBlock Text="Timeline" FontSize="32" HorizontalAlignment="Right"/>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+
+        <TextBlock Margin="16 0 0 8" Text="Timeline view of pictures" FontSize="32" HorizontalAlignment="Left" Foreground="#F2F3F3"/>
+        
+        <Border Grid.Row="1" BorderThickness="1"/>
+        
+        <ScrollViewer x:Name="scrollViewer" Grid.Row="2"
+                      HorizontalScrollBarVisibility="Auto"
+                      VerticalScrollBarVisibility="Disabled"
+                      IsVerticalScrollChainingEnabled="False">
+            <ItemsRepeater x:Name="itemsRepeater"
+                           ItemsSource="{Binding Items}"
+                           ItemTemplate="{StaticResource TimelineItemTemplateMonth}"
+                           Layout="{StaticResource HorizontalStackLayout}"
+                           PointerWheelChanged="ItemsRepeater_PointerWheelChanged"/>
+        </ScrollViewer>
+        
+        <Border Grid.Row="2"
+                HorizontalAlignment="Center"
+                BorderThickness="1"
+                PointerWheelChanged="ItemsRepeater_PointerWheelChanged"/>
     </Grid>
 </UserControl>
