@@ -1,33 +1,37 @@
 ﻿using System;
 using System.Collections.Generic;
-using CommunityToolkit.Mvvm.ComponentModel;
+using JpegViewer.App.Core.Types;
 
 namespace JpegViewer.App.Core.Models
 {
     /// <summary>
-    /// Item representing a time intervall in the timeline.
+    /// The base class for timeline items.
+    /// Represents a time intervall in the timeline.
     /// </summary>
-    public class TimelineItem : ObservableObject
+    public class TimelineItem
     {
-        private DateTime _itemKey;
-        private List<DateTime> _dates = new List<DateTime>();
+        /// <summary>
+        /// Holds the key date representing the timeline item.
+        /// It is read-only and set via constructor.
+        /// </summary>
+        public DateTime ItemKey { get; }
 
         /// <summary>
-        /// Holds the base date of the timeline item.
+        /// Type of the timeline item (Year, Month, Day, etc.).
+        /// Read-only and set via constructor.
         /// </summary>
-        public DateTime ItemKey
-        {
-            get => _itemKey;
-            set => SetProperty(ref _itemKey, value);
-        }
+        public ETimelineItemType ItemType { get; }
 
         /// <summary>
-        /// Holds the list of dates contained in the timeline item.
+        /// Images associated with this timeline item.
         /// </summary>
-        public List<DateTime> Dates
+        public List<ImageInfo> Images { get; }
+
+        public TimelineItem(DateTime itemKey, ETimelineItemType itemType, List<ImageInfo> images)
         {
-            get => _dates;
-            set => SetProperty(ref _dates, value);
+            ItemKey = itemKey;
+            ItemType = itemType;
+            Images = images;
         }
     }
 }

@@ -38,4 +38,15 @@ namespace JpegViewer.App.Core.Types
         Hours,
         Minutes
     }
+
+    /// <summary>
+    /// The type of timeline item.
+    /// </summary>
+    public enum  ETimelineItemType
+    {
+        YearsOfDecade,
+        MonthsOfYear,
+        DaysOfMonth,
+        HoursOfDay
+    }
 }

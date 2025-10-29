@@ -262,6 +262,10 @@
 
         <support:EnumStringEqualsConverter x:Key="EnumStringEqualsConverter"/>
         <support:MonthNameConverter x:Key="MonthNameConverter"/>
+        <support:TimelineItemTemplateSelector x:Key="TimelineItemTemplateSelector"
+                                              YearTemplate="{StaticResource TimelineItemTemplateYear}"
+                                              MonthTemplate="{StaticResource TimelineItemTemplateMonth}"
+                                              DayTemplate="{StaticResource TimelineItemTemplateDays}"/>
         <StackLayout x:Key="HorizontalStackLayout" Orientation="Horizontal"/>
     </UserControl.Resources>
 
@@ -281,22 +285,10 @@
                       VerticalScrollBarVisibility="Disabled"
                       IsVerticalScrollChainingEnabled="False">
             <ItemsRepeater x:Name="itemsRepeater"
+                           ItemsSource="{Binding Items}"
+                           ItemTemplate="{StaticResource TimelineItemTemplateSelector}"
                            Layout="{StaticResource HorizontalStackLayout}"
                            PointerWheelChanged="ItemsRepeater_PointerWheelChanged">
-                <i:Interaction.Behaviors>
-                    <i:DataTriggerBehavior Binding="{Binding ZoomLevel, Converter={StaticResource EnumStringEqualsConverter}, ConverterParameter=Years}" Value="True">
-                        <i:ChangePropertyAction PropertyName="ItemTemplate" Value="{StaticResource TimelineItemTemplateYear}"/>
-                        <i:ChangePropertyAction PropertyName="ItemsSource" Value="{Binding ItemsYears}"/>
-                    </i:DataTriggerBehavior>
-                    <i:DataTriggerBehavior Binding="{Binding ZoomLevel, Converter={StaticResource EnumStringEqualsConverter}, ConverterParameter=Months}" Value="True">
-                        <i:ChangePropertyAction PropertyName="ItemTemplate" Value="{StaticResource TimelineItemTemplateMonth}"/>
-                        <i:ChangePropertyAction PropertyName="ItemsSource" Value="{Binding ItemsMonths}"/>
-                    </i:DataTriggerBehavior>
-                    <i:DataTriggerBehavior Binding="{Binding ZoomLevel, Converter={StaticResource EnumStringEqualsConverter}, ConverterParameter=Days}" Value="True">
-                        <i:ChangePropertyAction PropertyName="ItemTemplate" Value="{StaticResource TimelineItemTemplateDays}"/>
-                        <i:ChangePropertyAction PropertyName="ItemsSource" Value="{Binding ItemsDays}"/>
-                    </i:DataTriggerBehavior>
-                </i:Interaction.Behaviors>
             </ItemsRepeater>
         </ScrollViewer>
         

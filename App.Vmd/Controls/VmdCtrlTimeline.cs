@@ -16,6 +16,7 @@ namespace JpegViewer.App.Vmd.Controls
     /// </summary>
     public partial class VmdCtrlTimeline : VmdBase
     {
+        private ObservableCollection<TimelineItem> _items = new ObservableCollection<TimelineItem>();
         private ObservableCollection<TimelineItem> _itemsYears = new ObservableCollection<TimelineItem>();
         private ObservableCollection<TimelineItem> _itemsMonths = new ObservableCollection<TimelineItem>();
         private ObservableCollection<TimelineItem> _itemsDays = new ObservableCollection<TimelineItem>();
@@ -54,7 +55,33 @@ namespace JpegViewer.App.Vmd.Controls
         public ETimelineZoomLevel ZoomLevel
         {
             get => _zoomLevel;
-            set => SetProperty(ref _zoomLevel, value);
+            set
+            {
+                if (SetProperty(ref _zoomLevel, value))
+                {
+                    switch (value)
+                    {
+                        case ETimelineZoomLevel.Years:
+                            Items = ItemsYears;
+                            break;
+                        case ETimelineZoomLevel.Months:
+                            Items = ItemsMonths;
+                            break;
+                        case ETimelineZoomLevel.Days:
+                            Items = ItemsDays;
+                            break;
+                    }
+                }
+            }
+        }
+
+        /// <summary>
+        /// The current timeline items set based on the zoom level.
+        /// </summary>
+        public ObservableCollection<TimelineItem> Items
+        {
+            get => _items;
+            set => SetProperty(ref _items, value);
         }
 
         /// <summary>
@@ -87,7 +114,7 @@ namespace JpegViewer.App.Vmd.Controls
         /// <summary>
         /// Holds picture dates to be displayed on the timeline.
         /// </summary>
-        public List<DateTime> PictureDates = new List<DateTime>();
+        public List<ImageInfo> Images = new List<ImageInfo>();
 
         /// <summary>
         /// Initializes a new instance of the <see cref="VmdCtrlTimeline"/> class.
@@ -95,7 +122,7 @@ namespace JpegViewer.App.Vmd.Controls
         public VmdCtrlTimeline(IDispatcherService dispatcherService) : base(dispatcherService)
         {
             ItemsWidth = MinItemsWidth;
-            ZoomLevel = ETimelineZoomLevel.Years;
+            ZoomLevel = ETimelineZoomLevel.Days;
         }
 
         /// <summary>
@@ -112,7 +139,7 @@ namespace JpegViewer.App.Vmd.Controls
         /// </summary>
         private void CreateDummyDates()
         {
-            PictureDates.Clear();
+            Images.Clear();
             var start = DateTime.Now;//.AddYears(100);
             var end = start.AddYears(-1000);
             var range = (end - start).TotalSeconds;
@@ -124,7 +151,7 @@ namespace JpegViewer.App.Vmd.Controls
                 ulong u = BitConverter.ToUInt64(bytes);
                 double sample = (u >> 11) * (1.0 / (1UL << 53)); // 53-bit precision
                 var secs = (long)(sample * range);
-                PictureDates.Add(start.AddSeconds(secs));
+                Images.Add(new ImageInfo(Guid.NewGuid().ToString("X"), start.AddSeconds(secs)));
             }
 
             // After generating dates, calculate timeline items
@@ -132,7 +159,7 @@ namespace JpegViewer.App.Vmd.Controls
             {
                 var yearsItems = GetItemsForYearZoom();
                 // Update collections on the UI thread
-                DispatcherService.Invoke(() => { ItemsYears = new ObservableCollection<TimelineItem>(yearsItems); });
+                DispatcherService.Invoke(() => { ItemsYears = new ObservableCollection<TimelineItem>(yearsItems); ZoomLevel = ETimelineZoomLevel.Years; });
             });
 
             Task.Run(() =>
@@ -155,24 +182,20 @@ namespace JpegViewer.App.Vmd.Controls
         /// </summary>
         private List<TimelineItem> GetItemsForYearZoom()
         {
-            int minYear = PictureDates.Min(d => d.Year);
-            int maxYear = PictureDates.Max(d => d.Year);
+            int minYear = Images.Min(d => d.DateTaken.Year);
+            int maxYear = Images.Max(d => d.DateTaken.Year);
             int startDecade = (minYear / 10) * 10;
             int endDecade = (maxYear / 10) * 10;
 
             // Group existing dates by decade start year
-            var grouped = PictureDates.GroupBy(d => (d.Year / 10) * 10).ToDictionary(g => g.Key, g => g.Order().ToList());
+            var grouped = Images.GroupBy(d => (d.DateTaken.Year / 10) * 10).ToDictionary(g => g.Key, g => g.OrderBy(d => d.DateTaken).ToList());
 
             // Create timeline items for each decade in the range
             var result = new List<TimelineItem>();
             for (int decade = startDecade; decade <= endDecade; decade += 10)
             {
                 grouped.TryGetValue(decade, out var list);
-                result.Add(new TimelineItem()
-                {
-                    ItemKey = new DateTime(decade, 1, 1),
-                    Dates = list ?? new List<DateTime>()
-                });
+                result.Add(new TimelineItemYearsOfDecade(decade, list ?? new List<ImageInfo>()));
             }
             return result;
         }
@@ -182,22 +205,18 @@ namespace JpegViewer.App.Vmd.Controls
         /// </summary>
         private List<TimelineItem> GetItemsForMonthZoom()
         {
-            int minYear = PictureDates.Min(d => d.Year);
-            int maxYear = PictureDates.Max(d => d.Year);
+            int minYear = Images.Min(d => d.DateTaken.Year);
+            int maxYear = Images.Max(d => d.DateTaken.Year);
 
             // Group existing dates by year
-            var grouped = PictureDates.GroupBy(d => d.Year).ToDictionary(g => g.Key, g => g.Order().ToList());
+            var grouped = Images.GroupBy(d => d.DateTaken.Year).ToDictionary(g => g.Key, g => g.OrderBy(d => d.DateTaken).ToList());
 
             // Create timeline items for each year in the range
             var result = new List<TimelineItem>();
             for (int year = minYear; year <= maxYear; year++)
             {
                 grouped.TryGetValue(year, out var list);
-                result.Add(new TimelineItem()
-                {
-                    ItemKey = new DateTime(year, 1, 1),
-                    Dates = list ?? new List<DateTime>()
-                });
+                result.Add(new TimelineItemMonthsOfYear(year, list ?? new List<ImageInfo>()));
             }
             return result;
         }
@@ -207,11 +226,11 @@ namespace JpegViewer.App.Vmd.Controls
         /// </summary>
         private List<TimelineItem> GetItemsForDayZoom()
         {
-            int minYear = PictureDates.Min(d => d.Year);
-            int maxYear = PictureDates.Max(d => d.Year);
+            int minYear = Images.Min(d => d.DateTaken.Year);
+            int maxYear = Images.Max(d => d.DateTaken.Year);
 
             // Group existing dates by (year, month)
-            var grouped = PictureDates.GroupBy(d => (d.Year, d.Month)).ToDictionary(g => g.Key, g => g.Order().ToList());
+            var grouped = Images.GroupBy(d => (d.DateTaken.Year, d.DateTaken.Month)).ToDictionary(g => g.Key, g => g.OrderBy(d => d.DateTaken).ToList());
 
             // Create timeline items for each month in the range
             var result = new List<TimelineItem>();
@@ -220,11 +239,7 @@ namespace JpegViewer.App.Vmd.Controls
                 for (int month = 1; month <= 12; month++)
                 {
                     grouped.TryGetValue((year, month), out var list);
-                    result.Add(new TimelineItem()
-                    {
-                        ItemKey = new DateTime(year, month, 1),
-                        Dates = list ?? new List<DateTime>()
-                    });
+                    result.Add(new TimelineItemDaysOfMonth(year, month, list ?? new List<ImageInfo>()));
                 }
             }
             return result;
