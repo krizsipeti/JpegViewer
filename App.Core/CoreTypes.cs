@@ -34,7 +34,6 @@ namespace JpegViewer.App.Core.Types
     {
         Years,
         Months,
-        Weeks,
         Days,
         Hours,
         Minutes

@@ -86,6 +86,11 @@ namespace JpegViewer.App.UI.Controls
                         vmdCtrlTimeline.ItemsWidth = vmdCtrlTimeline.MinItemsWidth;
                         vmdCtrlTimeline.ZoomLevel = ETimelineZoomLevel.Months;
                     }
+                    else if (vmdCtrlTimeline.ZoomLevel == ETimelineZoomLevel.Months)
+                    {
+                        vmdCtrlTimeline.ItemsWidth = vmdCtrlTimeline.MinItemsWidth;
+                        vmdCtrlTimeline.ZoomLevel = ETimelineZoomLevel.Days;
+                    }
                 }
                 else if (vmdCtrlTimeline.ItemsWidth + change < vmdCtrlTimeline.MinItemsWidth)
                 {
@@ -93,6 +98,11 @@ namespace JpegViewer.App.UI.Controls
                     {
                         vmdCtrlTimeline.ItemsWidth = vmdCtrlTimeline.MaxItemsWidth;
                         vmdCtrlTimeline.ZoomLevel = ETimelineZoomLevel.Years;
+                    }
+                    else if (vmdCtrlTimeline.ZoomLevel == ETimelineZoomLevel.Days)
+                    {
+                        vmdCtrlTimeline.ItemsWidth = vmdCtrlTimeline.MaxItemsWidth;
+                        vmdCtrlTimeline.ZoomLevel = ETimelineZoomLevel.Months;
                     }
                 }
                 else

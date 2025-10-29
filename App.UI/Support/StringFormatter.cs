@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Globalization;
 
 namespace JpegViewer.App.UI.Support
 {
@@ -18,6 +14,25 @@ namespace JpegViewer.App.UI.Support
         /// <param name="range"></param>
         /// <returns></returns>
         public static string YearRange(int startYear, int range) => range > 1 ? $"{startYear} - {(startYear + (range - 1))}" : startYear.ToString();
+
+        /// <summary>
+        /// Returns a formatted string with the month name and year.
+        /// </summary>
+        public static string MonthAndYear(int month, int year) => $"{MonthNameConverter(month)}, {year}";
+
+        /// <summary>
+        /// Returns the localized month name for the given month integer (1-12).
+        /// </summary>
+        /// <param name="month"></param>
+        /// <returns></returns>
+        public static string MonthNameConverter(int month)
+        {
+            if (month < 1 || month > 12)
+            {
+                return string.Empty;
+            }
+            return CultureInfo.CurrentCulture.TextInfo.ToTitleCase(CultureInfo.CurrentCulture.DateTimeFormat.GetMonthName(month));
+        }
 
         /// <summary>
         /// Increases the given integer value by n and returns it as a string.
