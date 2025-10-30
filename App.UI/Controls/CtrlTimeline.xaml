@@ -37,7 +37,7 @@
         <Style TargetType="FontIcon">
             <Setter Property="FontFamily" Value="Segoe Fluent Icons"/>
             <Setter Property="Grid.Row" Value="2"/>
-            <Setter Property="FontSize" Value="24"/>
+            <Setter Property="FontSize" Value="32"/>
             <Setter Property="Foreground" Value="#9EA0A2"/>
             <Setter Property="Glyph" Value="&#xe91b;"/>
         </Style>
@@ -90,16 +90,16 @@
                 <TextBlock Grid.Column="7" Text="{x:Bind support:StringFormatter.IncreaseByN(ItemKey.Year, 7)}"/>
                 <TextBlock Grid.Column="8" Text="{x:Bind support:StringFormatter.IncreaseByN(ItemKey.Year, 8)}"/>
                 <TextBlock Grid.Column="9" Text="{x:Bind support:StringFormatter.IncreaseByN(ItemKey.Year, 9)}"/>
-                <FontIcon Visibility="{x:Bind support:XamlBindHelpers.CountToVisibility(Images, 0)}" />
-                <FontIcon Grid.Column="1" Visibility="{x:Bind support:XamlBindHelpers.CountToVisibility(Images, 1)}"/>
-                <FontIcon Grid.Column="2" Visibility="{x:Bind support:XamlBindHelpers.CountToVisibility(Images, 2)}"/>
-                <FontIcon Grid.Column="3" Visibility="{x:Bind support:XamlBindHelpers.CountToVisibility(Images, 3)}"/>
-                <FontIcon Grid.Column="4" Visibility="{x:Bind support:XamlBindHelpers.CountToVisibility(Images, 4)}"/>
-                <FontIcon Grid.Column="5" Visibility="{x:Bind support:XamlBindHelpers.CountToVisibility(Images, 5)}"/>
-                <FontIcon Grid.Column="6" Visibility="{x:Bind support:XamlBindHelpers.CountToVisibility(Images, 6)}"/>
-                <FontIcon Grid.Column="7" Visibility="{x:Bind support:XamlBindHelpers.CountToVisibility(Images, 7)}"/>
-                <FontIcon Grid.Column="8" Visibility="{x:Bind support:XamlBindHelpers.CountToVisibility(Images, 8)}"/>
-                <FontIcon Grid.Column="9" Visibility="{x:Bind support:XamlBindHelpers.CountToVisibility(Images, 9)}"/>
+                <FontIcon Visibility="{x:Bind support:XamlBindHelpers.CountToVisibility(Units, 0)}" />
+                <FontIcon Grid.Column="1" Visibility="{x:Bind support:XamlBindHelpers.CountToVisibility(Units, 1)}"/>
+                <FontIcon Grid.Column="2" Visibility="{x:Bind support:XamlBindHelpers.CountToVisibility(Units, 2)}"/>
+                <FontIcon Grid.Column="3" Visibility="{x:Bind support:XamlBindHelpers.CountToVisibility(Units, 3)}"/>
+                <FontIcon Grid.Column="4" Visibility="{x:Bind support:XamlBindHelpers.CountToVisibility(Units, 4)}"/>
+                <FontIcon Grid.Column="5" Visibility="{x:Bind support:XamlBindHelpers.CountToVisibility(Units, 5)}"/>
+                <FontIcon Grid.Column="6" Visibility="{x:Bind support:XamlBindHelpers.CountToVisibility(Units, 6)}"/>
+                <FontIcon Grid.Column="7" Visibility="{x:Bind support:XamlBindHelpers.CountToVisibility(Units, 7)}"/>
+                <FontIcon Grid.Column="8" Visibility="{x:Bind support:XamlBindHelpers.CountToVisibility(Units, 8)}"/>
+                <FontIcon Grid.Column="9" Visibility="{x:Bind support:XamlBindHelpers.CountToVisibility(Units, 9)}"/>
                 <Border Grid.RowSpan="3" BorderThickness="1" BorderBrush="#26272B" HorizontalAlignment="Left"/>
             </Grid>
         </DataTemplate>
@@ -158,18 +158,18 @@
                 <TextBlock Grid.Column="10" Text="{x:Bind support:StringFormatter.MonthNameConverter(11)}"/>
                 <Rectangle Grid.Column="11" Style="{StaticResource RectB}"/>
                 <TextBlock Grid.Column="11" Text="{x:Bind support:StringFormatter.MonthNameConverter(12)}"/>
-                <FontIcon Visibility="{x:Bind support:XamlBindHelpers.CountToVisibility(Images, 0)}" />
-                <FontIcon Grid.Column="1" Visibility="{x:Bind support:XamlBindHelpers.CountToVisibility(Images, 1)}"/>
-                <FontIcon Grid.Column="2" Visibility="{x:Bind support:XamlBindHelpers.CountToVisibility(Images, 2)}"/>
-                <FontIcon Grid.Column="3" Visibility="{x:Bind support:XamlBindHelpers.CountToVisibility(Images, 3)}"/>
-                <FontIcon Grid.Column="4" Visibility="{x:Bind support:XamlBindHelpers.CountToVisibility(Images, 4)}"/>
-                <FontIcon Grid.Column="5" Visibility="{x:Bind support:XamlBindHelpers.CountToVisibility(Images, 5)}"/>
-                <FontIcon Grid.Column="6" Visibility="{x:Bind support:XamlBindHelpers.CountToVisibility(Images, 6)}"/>
-                <FontIcon Grid.Column="7" Visibility="{x:Bind support:XamlBindHelpers.CountToVisibility(Images, 7)}"/>
-                <FontIcon Grid.Column="8" Visibility="{x:Bind support:XamlBindHelpers.CountToVisibility(Images, 8)}"/>
-                <FontIcon Grid.Column="9" Visibility="{x:Bind support:XamlBindHelpers.CountToVisibility(Images, 9)}"/>
-                <FontIcon Grid.Column="10" Visibility="{x:Bind support:XamlBindHelpers.CountToVisibility(Images, 10)}"/>
-                <FontIcon Grid.Column="11" Visibility="{x:Bind support:XamlBindHelpers.CountToVisibility(Images, 11)}"/>
+                <FontIcon Visibility="{x:Bind support:XamlBindHelpers.CountToVisibility(Units, 0)}" />
+                <FontIcon Grid.Column="1" Visibility="{x:Bind support:XamlBindHelpers.CountToVisibility(Units, 1)}"/>
+                <FontIcon Grid.Column="2" Visibility="{x:Bind support:XamlBindHelpers.CountToVisibility(Units, 2)}"/>
+                <FontIcon Grid.Column="3" Visibility="{x:Bind support:XamlBindHelpers.CountToVisibility(Units, 3)}"/>
+                <FontIcon Grid.Column="4" Visibility="{x:Bind support:XamlBindHelpers.CountToVisibility(Units, 4)}"/>
+                <FontIcon Grid.Column="5" Visibility="{x:Bind support:XamlBindHelpers.CountToVisibility(Units, 5)}"/>
+                <FontIcon Grid.Column="6" Visibility="{x:Bind support:XamlBindHelpers.CountToVisibility(Units, 6)}"/>
+                <FontIcon Grid.Column="7" Visibility="{x:Bind support:XamlBindHelpers.CountToVisibility(Units, 7)}"/>
+                <FontIcon Grid.Column="8" Visibility="{x:Bind support:XamlBindHelpers.CountToVisibility(Units, 8)}"/>
+                <FontIcon Grid.Column="9" Visibility="{x:Bind support:XamlBindHelpers.CountToVisibility(Units, 9)}"/>
+                <FontIcon Grid.Column="10" Visibility="{x:Bind support:XamlBindHelpers.CountToVisibility(Units, 10)}"/>
+                <FontIcon Grid.Column="11" Visibility="{x:Bind support:XamlBindHelpers.CountToVisibility(Units, 11)}"/>
                 <Border Grid.RowSpan="3" BorderThickness="1" BorderBrush="#26272B" HorizontalAlignment="Left"/>
             </Grid>
         </DataTemplate>
@@ -285,37 +285,37 @@
                 <TextBlock Grid.Column="29" Text="30" Visibility="{Binding Visibility, ElementName=r30}"/>
                 <Rectangle Grid.Column="30" x:Name="r31" Style="{StaticResource RectA}" Visibility="{x:Bind support:XamlBindHelpers.IsDayVisible(ItemKey.Year, ItemKey.Month, 31)}"/>
                 <TextBlock Grid.Column="30" Text="31" Visibility="{Binding Visibility, ElementName=r31}"/>
-                <FontIcon Grid.Column="0" Visibility="{x:Bind support:XamlBindHelpers.CountToVisibility(Images, 0)}"/>
-                <FontIcon Grid.Column="1" Visibility="{x:Bind support:XamlBindHelpers.CountToVisibility(Images, 1)}"/>
-                <FontIcon Grid.Column="2" Visibility="{x:Bind support:XamlBindHelpers.CountToVisibility(Images, 2)}"/>
-                <FontIcon Grid.Column="3" Visibility="{x:Bind support:XamlBindHelpers.CountToVisibility(Images, 3)}"/>
-                <FontIcon Grid.Column="4" Visibility="{x:Bind support:XamlBindHelpers.CountToVisibility(Images, 4)}"/>
-                <FontIcon Grid.Column="5" Visibility="{x:Bind support:XamlBindHelpers.CountToVisibility(Images, 5)}"/>
-                <FontIcon Grid.Column="6" Visibility="{x:Bind support:XamlBindHelpers.CountToVisibility(Images, 6)}"/>
-                <FontIcon Grid.Column="7" Visibility="{x:Bind support:XamlBindHelpers.CountToVisibility(Images, 7)}"/>
-                <FontIcon Grid.Column="8" Visibility="{x:Bind support:XamlBindHelpers.CountToVisibility(Images, 8)}"/>
-                <FontIcon Grid.Column="9" Visibility="{x:Bind support:XamlBindHelpers.CountToVisibility(Images, 9)}"/>
-                <FontIcon Grid.Column="10" Visibility="{x:Bind support:XamlBindHelpers.CountToVisibility(Images, 10)}"/>
-                <FontIcon Grid.Column="11" Visibility="{x:Bind support:XamlBindHelpers.CountToVisibility(Images, 11)}"/>
-                <FontIcon Grid.Column="12" Visibility="{x:Bind support:XamlBindHelpers.CountToVisibility(Images, 12)}"/>
-                <FontIcon Grid.Column="13" Visibility="{x:Bind support:XamlBindHelpers.CountToVisibility(Images, 13)}"/>
-                <FontIcon Grid.Column="14" Visibility="{x:Bind support:XamlBindHelpers.CountToVisibility(Images, 14)}"/>
-                <FontIcon Grid.Column="15" Visibility="{x:Bind support:XamlBindHelpers.CountToVisibility(Images, 15)}"/>
-                <FontIcon Grid.Column="16" Visibility="{x:Bind support:XamlBindHelpers.CountToVisibility(Images, 16)}"/>
-                <FontIcon Grid.Column="17" Visibility="{x:Bind support:XamlBindHelpers.CountToVisibility(Images, 17)}"/>
-                <FontIcon Grid.Column="18" Visibility="{x:Bind support:XamlBindHelpers.CountToVisibility(Images, 18)}"/>
-                <FontIcon Grid.Column="19" Visibility="{x:Bind support:XamlBindHelpers.CountToVisibility(Images, 19)}"/>
-                <FontIcon Grid.Column="20" Visibility="{x:Bind support:XamlBindHelpers.CountToVisibility(Images, 20)}"/>
-                <FontIcon Grid.Column="21" Visibility="{x:Bind support:XamlBindHelpers.CountToVisibility(Images, 21)}"/>
-                <FontIcon Grid.Column="22" Visibility="{x:Bind support:XamlBindHelpers.CountToVisibility(Images, 22)}"/>
-                <FontIcon Grid.Column="23" Visibility="{x:Bind support:XamlBindHelpers.CountToVisibility(Images, 23)}"/>
-                <FontIcon Grid.Column="24" Visibility="{x:Bind support:XamlBindHelpers.CountToVisibility(Images, 24)}"/>
-                <FontIcon Grid.Column="25" Visibility="{x:Bind support:XamlBindHelpers.CountToVisibility(Images, 25)}"/>
-                <FontIcon Grid.Column="26" Visibility="{x:Bind support:XamlBindHelpers.CountToVisibility(Images, 26)}"/>
-                <FontIcon Grid.Column="27" Visibility="{x:Bind support:XamlBindHelpers.CountToVisibility(Images, 27)}"/>
-                <FontIcon Grid.Column="28" Visibility="{x:Bind support:XamlBindHelpers.CountToVisibility(Images, 28)}"/>
-                <FontIcon Grid.Column="29" Visibility="{x:Bind support:XamlBindHelpers.CountToVisibility(Images, 29)}"/>
-                <FontIcon Grid.Column="30" Visibility="{x:Bind support:XamlBindHelpers.CountToVisibility(Images, 30)}"/>
+                <FontIcon Grid.Column="0" Visibility="{x:Bind support:XamlBindHelpers.CountToVisibility(Units, 0)}"/>
+                <FontIcon Grid.Column="1" Visibility="{x:Bind support:XamlBindHelpers.CountToVisibility(Units, 1)}"/>
+                <FontIcon Grid.Column="2" Visibility="{x:Bind support:XamlBindHelpers.CountToVisibility(Units, 2)}"/>
+                <FontIcon Grid.Column="3" Visibility="{x:Bind support:XamlBindHelpers.CountToVisibility(Units, 3)}"/>
+                <FontIcon Grid.Column="4" Visibility="{x:Bind support:XamlBindHelpers.CountToVisibility(Units, 4)}"/>
+                <FontIcon Grid.Column="5" Visibility="{x:Bind support:XamlBindHelpers.CountToVisibility(Units, 5)}"/>
+                <FontIcon Grid.Column="6" Visibility="{x:Bind support:XamlBindHelpers.CountToVisibility(Units, 6)}"/>
+                <FontIcon Grid.Column="7" Visibility="{x:Bind support:XamlBindHelpers.CountToVisibility(Units, 7)}"/>
+                <FontIcon Grid.Column="8" Visibility="{x:Bind support:XamlBindHelpers.CountToVisibility(Units, 8)}"/>
+                <FontIcon Grid.Column="9" Visibility="{x:Bind support:XamlBindHelpers.CountToVisibility(Units, 9)}"/>
+                <FontIcon Grid.Column="10" Visibility="{x:Bind support:XamlBindHelpers.CountToVisibility(Units, 10)}"/>
+                <FontIcon Grid.Column="11" Visibility="{x:Bind support:XamlBindHelpers.CountToVisibility(Units, 11)}"/>
+                <FontIcon Grid.Column="12" Visibility="{x:Bind support:XamlBindHelpers.CountToVisibility(Units, 12)}"/>
+                <FontIcon Grid.Column="13" Visibility="{x:Bind support:XamlBindHelpers.CountToVisibility(Units, 13)}"/>
+                <FontIcon Grid.Column="14" Visibility="{x:Bind support:XamlBindHelpers.CountToVisibility(Units, 14)}"/>
+                <FontIcon Grid.Column="15" Visibility="{x:Bind support:XamlBindHelpers.CountToVisibility(Units, 15)}"/>
+                <FontIcon Grid.Column="16" Visibility="{x:Bind support:XamlBindHelpers.CountToVisibility(Units, 16)}"/>
+                <FontIcon Grid.Column="17" Visibility="{x:Bind support:XamlBindHelpers.CountToVisibility(Units, 17)}"/>
+                <FontIcon Grid.Column="18" Visibility="{x:Bind support:XamlBindHelpers.CountToVisibility(Units, 18)}"/>
+                <FontIcon Grid.Column="19" Visibility="{x:Bind support:XamlBindHelpers.CountToVisibility(Units, 19)}"/>
+                <FontIcon Grid.Column="20" Visibility="{x:Bind support:XamlBindHelpers.CountToVisibility(Units, 20)}"/>
+                <FontIcon Grid.Column="21" Visibility="{x:Bind support:XamlBindHelpers.CountToVisibility(Units, 21)}"/>
+                <FontIcon Grid.Column="22" Visibility="{x:Bind support:XamlBindHelpers.CountToVisibility(Units, 22)}"/>
+                <FontIcon Grid.Column="23" Visibility="{x:Bind support:XamlBindHelpers.CountToVisibility(Units, 23)}"/>
+                <FontIcon Grid.Column="24" Visibility="{x:Bind support:XamlBindHelpers.CountToVisibility(Units, 24)}"/>
+                <FontIcon Grid.Column="25" Visibility="{x:Bind support:XamlBindHelpers.CountToVisibility(Units, 25)}"/>
+                <FontIcon Grid.Column="26" Visibility="{x:Bind support:XamlBindHelpers.CountToVisibility(Units, 26)}"/>
+                <FontIcon Grid.Column="27" Visibility="{x:Bind support:XamlBindHelpers.CountToVisibility(Units, 27)}"/>
+                <FontIcon Grid.Column="28" Visibility="{x:Bind support:XamlBindHelpers.CountToVisibility(Units, 28)}"/>
+                <FontIcon Grid.Column="29" Visibility="{x:Bind support:XamlBindHelpers.CountToVisibility(Units, 29)}"/>
+                <FontIcon Grid.Column="30" Visibility="{x:Bind support:XamlBindHelpers.CountToVisibility(Units, 30)}"/>
                 <Border Grid.RowSpan="3" BorderThickness="1" BorderBrush="#26272B" HorizontalAlignment="Left"/>
             </Grid>
         </DataTemplate>

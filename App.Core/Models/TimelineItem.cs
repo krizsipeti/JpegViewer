@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
 using JpegViewer.App.Core.Types;
 
 namespace JpegViewer.App.Core.Models
@@ -25,14 +24,14 @@ namespace JpegViewer.App.Core.Models
 
         /// <summary>
         /// Images associated with this timeline item groupped by the item's sub-items (years, months, days, etc.).
-        /// </summary>
-        public Dictionary<int, ObservableCollection<ImageInfo>> Images { get; }
+        /// </summary>        
+        public List<TimelineItemBaseUnit> Units { get; }
 
-        public TimelineItem(DateTime itemKey, ETimelineItemType itemType, Dictionary<int, ObservableCollection<ImageInfo>> images)
+        public TimelineItem(DateTime itemKey, ETimelineItemType itemType, List<TimelineItemBaseUnit> units)
         {
             ItemKey = itemKey;
             ItemType = itemType;
-            Images = images;
+            Units = units;
         }
     }
 }

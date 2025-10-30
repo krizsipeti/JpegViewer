@@ -30,13 +30,13 @@ namespace JpegViewer.App.UI.Support
         /// <summary>
         /// Converts count to visibility.
         /// </summary>
-        public static Visibility CountToVisibility(Dictionary<int, ObservableCollection<ImageInfo>> images, int index)
+        public static Visibility CountToVisibility(List<TimelineItemBaseUnit> units, int index)
         {
-            if (images == null || !images.ContainsKey(index))
+            if (units == null || units.Count <= index || index < 0)
             {
                 return Visibility.Collapsed;
             }
-            return images[index].Count > 0 ? Visibility.Visible : Visibility.Collapsed;
+            return (units[index]?.Images?.Count ?? 0) > 0 ? Visibility.Visible : Visibility.Collapsed;
         }
     }
 }

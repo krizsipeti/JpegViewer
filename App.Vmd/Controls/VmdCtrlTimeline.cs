@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
 using System.Security.Cryptography;
+using System.Text;
 using System.Threading.Tasks;
 using CommunityToolkit.Mvvm.Input;
 using JpegViewer.App.Core.Interfaces;
@@ -190,15 +191,30 @@ namespace JpegViewer.App.Vmd.Controls
 
             // Group existing dates by decade start year
             var grouped = Images.GroupBy(d => (d.DateTaken.Year / 10) * 10)
-                .ToDictionary(g => g.Key, g => g.GroupBy(i => i.DateTaken.Year - g.Key)
+                .ToDictionary(g => g.Key, g => g.GroupBy(i => i.DateTaken.Year)
                 .ToDictionary(n => n.Key, n => new ObservableCollection<ImageInfo>(n)));
 
             // Create timeline items for each decade in the range
             var result = new List<TimelineItem>();
             for (int decade = startDecade; decade <= endDecade; decade += 10)
             {
-                grouped.TryGetValue(decade, out var list);
-                result.Add(new TimelineItemYearsOfDecade(decade, list ?? new Dictionary<int, ObservableCollection<ImageInfo>>()));
+                List<TimelineItemBaseUnit> baseUints = new List<TimelineItemBaseUnit>();
+                if (grouped.TryGetValue(decade, out var list))
+                {
+                    for (int year = decade; year < decade + 10; year++)
+                    {
+                        list.TryGetValue(year, out var images);
+                        baseUints.Add(new TimelineItemBaseUnit(year) { Images = images });
+                    }
+                }
+                else
+                {
+                    for (int year = decade; year < decade + 10; year++)
+                    {
+                        baseUints.Add(new TimelineItemBaseUnit(year));
+                    }
+                }
+                result.Add(new TimelineItemYearsOfDecade(decade, baseUints));
             }
             return result;
         }
@@ -213,15 +229,30 @@ namespace JpegViewer.App.Vmd.Controls
 
             // Group existing dates by year
             var grouped = Images.GroupBy(d => d.DateTaken.Year)
-                .ToDictionary(g => g.Key, g => g.GroupBy(i => i.DateTaken.Month - 1)
+                .ToDictionary(g => g.Key, g => g.GroupBy(i => i.DateTaken.Month)
                 .ToDictionary(n => n.Key, n => new ObservableCollection<ImageInfo>(n)));
 
             // Create timeline items for each year in the range
             var result = new List<TimelineItem>();
             for (int year = minYear; year <= maxYear; year++)
             {
-                grouped.TryGetValue(year, out var list);
-                result.Add(new TimelineItemMonthsOfYear(year, list ?? new Dictionary<int, ObservableCollection<ImageInfo>>()));
+                List<TimelineItemBaseUnit> baseUints = new List<TimelineItemBaseUnit>();
+                if (grouped.TryGetValue(year, out var list))
+                {
+                    for (int month = 1; month <= 12; month++)
+                    {
+                        list.TryGetValue(month, out var images);
+                        baseUints.Add(new TimelineItemBaseUnit(month) { Images = images });
+                    }
+                }
+                else
+                {
+                    for (int month = 1; month <= 12; month++)
+                    {
+                        baseUints.Add(new TimelineItemBaseUnit(month));
+                    }
+                }
+                result.Add(new TimelineItemMonthsOfYear(year, baseUints));
             }
             return result;
         }
@@ -236,7 +267,7 @@ namespace JpegViewer.App.Vmd.Controls
 
             // Group existing dates by (year, month)
             var grouped = Images.GroupBy(d => (d.DateTaken.Year, d.DateTaken.Month))
-                .ToDictionary(g => g.Key, g => g.GroupBy(i => i.DateTaken.Day - 1)
+                .ToDictionary(g => g.Key, g => g.GroupBy(i => i.DateTaken.Day)
                 .ToDictionary(n => n.Key, n => new ObservableCollection<ImageInfo>(n)));
 
             // Create timeline items for each month in the range
@@ -245,8 +276,23 @@ namespace JpegViewer.App.Vmd.Controls
             {
                 for (int month = 1; month <= 12; month++)
                 {
-                    grouped.TryGetValue((year, month), out var list);
-                    result.Add(new TimelineItemDaysOfMonth(year, month, list ?? new Dictionary<int, ObservableCollection<ImageInfo>>()));
+                    List<TimelineItemBaseUnit> baseUints = new List<TimelineItemBaseUnit>();
+                    if (grouped.TryGetValue((year, month), out var list))
+                    {
+                        for (int day = 1; day <= DateTime.DaysInMonth(year, month); day++)
+                        {
+                            list.TryGetValue(day, out var images);
+                            baseUints.Add(new TimelineItemBaseUnit(day) { Images = images});
+                        }
+                    }
+                    else
+                    {
+                        for (int day = 1; day <= DateTime.DaysInMonth(year, month); day++)
+                        {
+                            baseUints.Add(new TimelineItemBaseUnit(day));
+                        }
+                    }
+                    result.Add(new TimelineItemDaysOfMonth(year, month, baseUints));
                 }
             }
             return result;

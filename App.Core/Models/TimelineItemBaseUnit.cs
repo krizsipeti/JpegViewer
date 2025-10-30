@@ -1,0 +1,31 @@
+﻿using System.Collections.ObjectModel;
+
+namespace JpegViewer.App.Core.Models
+{
+    /// <summary>
+    /// The base unit of the current timeline item.
+    /// Depends on the timeline item type.
+    /// </summary>
+    public class TimelineItemBaseUnit
+    {
+        /// <summary>
+        /// The value of this item in base units.
+        /// For example year, month, day, hour, etc.
+        /// </summary>
+        public int Value { get; }
+
+        /// <summary>
+        /// All the images belongs to this item based on their creation time or null of none.
+        /// </summary>
+        public ObservableCollection<ImageInfo>? Images { get; set; }
+
+        /// <summary>
+        /// Create base unit with immutable value
+        /// </summary>
+        /// <param name="value"></param>
+        public TimelineItemBaseUnit(int value)
+        {
+            Value = value;
+        }
+    }
+}
