@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
 using System.Security.Cryptography;
-using System.Text;
 using System.Threading.Tasks;
 using CommunityToolkit.Mvvm.Input;
 using JpegViewer.App.Core.Interfaces;
@@ -189,38 +188,33 @@ namespace JpegViewer.App.Vmd.Controls
         /// </summary>
         private List<TimelineItem> GetItemsForYearZoom()
         {
-            int minYear = Images.Min(d => d.DateTaken.Year);
-            int maxYear = Images.Max(d => d.DateTaken.Year);
+            // First group images by year
+            var imagesByYear = Images.GroupBy(i => i.DateTaken.Year).ToDictionary(g => g.Key, g => new ObservableCollection<ImageInfo>(g));
+            if (imagesByYear.Count == 0)
+            {
+                return new List<TimelineItem>(); // Empty timeline if no images found
+            }
+
+            // Determine the start and end decade
+            int minYear = imagesByYear.Keys.Min();
+            int maxYear = imagesByYear.Keys.Max();
             int startDecade = (minYear / 10) * 10;
             int endDecade = (maxYear / 10) * 10;
 
-            // Group existing dates by decade start year
-            var grouped = Images.GroupBy(d => (d.DateTaken.Year / 10) * 10)
-                .ToDictionary(g => g.Key, g => g.GroupBy(i => i.DateTaken.Year)
-                .ToDictionary(n => n.Key, n => new ObservableCollection<ImageInfo>(n)));
-
-            // Create timeline items for each decade in the range
-            var result = new List<TimelineItem>();
+            // Allocate list with the calculated number of decades and create the TimelineItems
+            var result = new List<TimelineItem>((endDecade - startDecade) / 10 + 1);
             for (int decade = startDecade; decade <= endDecade; decade += 10)
             {
-                List<TimelineItemBaseUnit> baseUints = new List<TimelineItemBaseUnit>();
-                if (grouped.TryGetValue(decade, out var list))
+                // Allocate list for base units. We show 10 in every decade.
+                var baseUnits = new List<TimelineItemBaseUnit>(10);
+                for (int year = decade; year < decade + 10; year++)
                 {
-                    for (int year = decade; year < decade + 10; year++)
-                    {
-                        list.TryGetValue(year, out var images);
-                        baseUints.Add(new TimelineItemBaseUnit(ETimelineBaseUnitType.Year, year) { Images = images });
-                    }
+                    imagesByYear.TryGetValue(year, out var images);
+                    baseUnits.Add(new TimelineItemBaseUnit(ETimelineBaseUnitType.Year, year) { Images = images });
                 }
-                else
-                {
-                    for (int year = decade; year < decade + 10; year++)
-                    {
-                        baseUints.Add(new TimelineItemBaseUnit(ETimelineBaseUnitType.Year, year));
-                    }
-                }
-                result.Add(new TimelineItem(new DateTime(decade, 1, 1), ETimelineItemType.YearsOfDecade, baseUints));
+                result.Add(new TimelineItem(new DateTime(decade, 1, 1), ETimelineItemType.YearsOfDecade, baseUnits));
             }
+
             return result;
         }
 
@@ -229,36 +223,37 @@ namespace JpegViewer.App.Vmd.Controls
         /// </summary>
         private List<TimelineItem> GetItemsForMonthZoom()
         {
-            int minYear = Images.Min(d => d.DateTaken.Year);
-            int maxYear = Images.Max(d => d.DateTaken.Year);
+            // First group images by year and month
+            var imagesByYearMonth = Images.GroupBy(i => i.DateTaken.Year)
+                .ToDictionary(yg => yg.Key, yg => yg.GroupBy(i => i.DateTaken.Month)
+                .ToDictionary(mg => mg.Key, mg => new ObservableCollection<ImageInfo>(mg)));
+            if (imagesByYearMonth.Count == 0)
+            {
+                return new List<TimelineItem>(); // Empty timeline if no images found
+            }
 
-            // Group existing dates by year
-            var grouped = Images.GroupBy(d => d.DateTaken.Year)
-                .ToDictionary(g => g.Key, g => g.GroupBy(i => i.DateTaken.Month)
-                .ToDictionary(n => n.Key, n => new ObservableCollection<ImageInfo>(n)));
+            // Determine the min and max year
+            int minYear = imagesByYearMonth.Keys.Min();
+            int maxYear = imagesByYearMonth.Keys.Max();
 
-            // Create timeline items for each year in the range
-            var result = new List<TimelineItem>();
+            // Allocate list with the calculated number of years and create the TimelineItems
+            var result = new List<TimelineItem>(maxYear - minYear + 1);
             for (int year = minYear; year <= maxYear; year++)
             {
-                List<TimelineItemBaseUnit> baseUints = new List<TimelineItemBaseUnit>();
-                if (grouped.TryGetValue(year, out var list))
+                // Try to get the current year with the month groups
+                imagesByYearMonth.TryGetValue(year, out var monthsDict);
+
+                // Allocate list for every month base units
+                var baseUnits = new List<TimelineItemBaseUnit>(12);
+                for (int month = 1; month <= 12; month++)
                 {
-                    for (int month = 1; month <= 12; month++)
-                    {
-                        list.TryGetValue(month, out var images);
-                        baseUints.Add(new TimelineItemBaseUnit(ETimelineBaseUnitType.Month, month) { Images = images });
-                    }
+                    ObservableCollection<ImageInfo>? images = null;
+                    monthsDict?.TryGetValue(month, out images);
+                    baseUnits.Add(new TimelineItemBaseUnit(ETimelineBaseUnitType.Month, month) { Images = images });
                 }
-                else
-                {
-                    for (int month = 1; month <= 12; month++)
-                    {
-                        baseUints.Add(new TimelineItemBaseUnit(ETimelineBaseUnitType.Month, month));
-                    }
-                }
-                result.Add(new TimelineItem(new DateTime(year, 1, 1), ETimelineItemType.MonthsOfYear, baseUints));
+                result.Add(new TimelineItem(new DateTime(year, 1, 1), ETimelineItemType.MonthsOfYear, baseUnits));
             }
+
             return result;
         }
 
@@ -267,39 +262,46 @@ namespace JpegViewer.App.Vmd.Controls
         /// </summary>
         private List<TimelineItem> GetItemsForDayZoom()
         {
-            int minYear = Images.Min(d => d.DateTaken.Year);
-            int maxYear = Images.Max(d => d.DateTaken.Year);
+            // Single-pass grouping by year->month->day, avoid repeated Min/Max and repeated DaysInMonth calls
+            var imagesByYearMonthDay = Images.GroupBy(i => i.DateTaken.Year)
+                .ToDictionary(yg => yg.Key, yg => yg.GroupBy(i => i.DateTaken.Month)
+                .ToDictionary(mg => mg.Key, mg => mg.GroupBy(i => i.DateTaken.Day)
+                .ToDictionary(dg => dg.Key, dg => new ObservableCollection<ImageInfo>(dg))));
+            if (imagesByYearMonthDay.Count == 0)
+            {
+                return new List<TimelineItem>(); // Empty timeline if no images found
+            }
 
-            // Group existing dates by (year, month)
-            var grouped = Images.GroupBy(d => (d.DateTaken.Year, d.DateTaken.Month))
-                .ToDictionary(g => g.Key, g => g.GroupBy(i => i.DateTaken.Day)
-                .ToDictionary(n => n.Key, n => new ObservableCollection<ImageInfo>(n)));
+            // Determine the min and max year
+            int minYear = imagesByYearMonthDay.Keys.Min();
+            int maxYear = imagesByYearMonthDay.Keys.Max();
 
-            // Create timeline items for each month in the range
-            var result = new List<TimelineItem>();
+            // Allocate list with the calculated number of months and create the timeline items
+            var result = new List<TimelineItem>((maxYear - minYear + 1) * 12);
             for (int year = minYear; year <= maxYear; year++)
             {
+                // Try to get the current year with the month groups
+                imagesByYearMonthDay.TryGetValue(year, out var monthsDict);
+
                 for (int month = 1; month <= 12; month++)
                 {
-                    List<TimelineItemBaseUnit> baseUints = new List<TimelineItemBaseUnit>();
-                    if (grouped.TryGetValue((year, month), out var list))
+                    // Try to get current month with the days group
+                    Dictionary<int, ObservableCollection<ImageInfo>>? daysDict = null;
+                    monthsDict?.TryGetValue(month, out daysDict);
+
+                    // Allocate list for every day base units
+                    int daysInMonth = DateTime.DaysInMonth(year, month);
+                    var baseUnits = new List<TimelineItemBaseUnit>(daysInMonth);
+                    for (int day = 1; day <= daysInMonth; day++)
                     {
-                        for (int day = 1; day <= DateTime.DaysInMonth(year, month); day++)
-                        {
-                            list.TryGetValue(day, out var images);
-                            baseUints.Add(new TimelineItemBaseUnit(ETimelineBaseUnitType.Day, day) { Images = images});
-                        }
+                        ObservableCollection<ImageInfo>? images = null;
+                        daysDict?.TryGetValue(day, out images);
+                        baseUnits.Add(new TimelineItemBaseUnit(ETimelineBaseUnitType.Day, day) { Images = images });
                     }
-                    else
-                    {
-                        for (int day = 1; day <= DateTime.DaysInMonth(year, month); day++)
-                        {
-                            baseUints.Add(new TimelineItemBaseUnit(ETimelineBaseUnitType.Day, day));
-                        }
-                    }
-                    result.Add(new TimelineItem(new DateTime(year, month, 1), ETimelineItemType.DaysOfMonth, baseUints));
+                    result.Add(new TimelineItem(new DateTime(year, month, 1), ETimelineItemType.DaysOfMonth, baseUnits));
                 }
             }
+
             return result;
         }
     }
