@@ -12,7 +12,6 @@
     xmlns:support="using:JpegViewer.App.UI.Support"
     xmlns:types="using:JpegViewer.App.Core.Types"
     mc:Ignorable="d"
-    x:Name="rootCtrl"
     Height="300">
 
     <UserControl.Resources>
@@ -24,12 +23,7 @@
             <Setter Property="FontSize" Value="13.5"/>
             <Setter Property="FontWeight" Value="SemiBold"/>
         </Style>
-        <Style TargetType="Rectangle" x:Name="RectA">
-            <Setter Property="Fill" Value="#202124"/>
-        </Style>
-        <Style TargetType="Rectangle" x:Name="RectB">
-            <Setter Property="Fill" Value="#1F2024"/>
-        </Style>
+        
         <Style TargetType="FontIcon" x:Name="TimelineFontIconStyle">
             <Setter Property="FontFamily" Value="Segoe Fluent Icons"/>
             <Setter Property="FontSize" Value="32"/>
@@ -37,27 +31,26 @@
             <Setter Property="Glyph" Value="&#xe91b;"/>
         </Style>
 
-        <DataTemplate x:Name="TimelineItemTemplateYearsOfDecade" x:DataType="models:TimelineItemYearsOfDecade">
+        <StackLayout x:Key="HorizontalStackLayout" Orientation="Horizontal"/>
+
+        <DataTemplate x:Name="TimelineItemTemplate" x:DataType="models:TimelineItem">
             <Grid PointerPressed="Item_PointerPressed"
                   PointerMoved="Item_PointerMoved"
                   PointerReleased="Item_PointerReleased"
-                  PointerCanceled="Item_PointerCanceled">
+                  PointerCanceled="Item_PointerCanceled"
+                  Background="#202124">
                 <Grid.RowDefinitions>
-                    <RowDefinition Height="Auto"/>
                     <RowDefinition Height="Auto"/>
                     <RowDefinition Height="*"/>
                 </Grid.RowDefinitions>
 
-                <Rectangle Fill="#202124"/>
                 <TextBlock Margin="8 4 0 4"
-                           HorizontalAlignment="Left" Text="{x:Bind support:StringFormatter.YearRange(ItemKey.Year, 10)}"
+                           HorizontalAlignment="Left"
+                           Text="{x:Bind support:StringFormatter.TimelineItemHeaderText(ItemType, ItemKey)}"
                            Style="{StaticResource TimelineTextStyle}"/>
                 <Border BorderThickness="2" BorderBrush="#26272B" VerticalAlignment="Bottom"/>
 
-                <ItemsRepeater Grid.Row="1" Grid.RowSpan="2" ItemsSource="{x:Bind Units}">
-                    <ItemsRepeater.Layout>
-                        <StackLayout Orientation="Horizontal"/>
-                    </ItemsRepeater.Layout>
+                <ItemsRepeater x:Name="innerItemsRepeater" Grid.Row="1" ItemsSource="{x:Bind Units}" Layout="{StaticResource HorizontalStackLayout}">
                     <ItemsRepeater.ItemTemplate>
                         <DataTemplate x:DataType="models:TimelineItemBaseUnit">
                             <Grid MinWidth="{Binding DataContext.MinItemsWidth, ElementName=itemsRepeater}"
@@ -67,7 +60,7 @@
                                     <RowDefinition Height="Auto"/>
                                     <RowDefinition Height="*"/>
                                 </Grid.RowDefinitions>
-                                <TextBlock Text="{x:Bind Value}" Style="{StaticResource TimelineTextStyle}"/>
+                                <TextBlock Text="{x:Bind support:StringFormatter.TimeLineItemUnitText(Type, Value)}" Style="{StaticResource TimelineTextStyle}"/>
                                 <FontIcon Grid.Row="1"
                                           Visibility="{x:Bind support:XamlBindHelpers.CountToVisibility(Images)}"
                                           Style="{StaticResource TimelineFontIconStyle}"/>
@@ -78,124 +71,28 @@
                 <Border Grid.RowSpan="3" BorderThickness="1" BorderBrush="#26272B" HorizontalAlignment="Left"/>
             </Grid>
         </DataTemplate>
-
-        <DataTemplate x:Name="TimelineItemTemplateMonthsOfYear" x:DataType="models:TimelineItemMonthsOfYear">
-            <Grid PointerPressed="Item_PointerPressed"
-                  PointerMoved="Item_PointerMoved"
-                  PointerReleased="Item_PointerReleased"
-                  PointerCanceled="Item_PointerCanceled">
-                <Grid.RowDefinitions>
-                    <RowDefinition Height="Auto"/>
-                    <RowDefinition Height="Auto"/>
-                    <RowDefinition Height="*"/>
-                </Grid.RowDefinitions>
-
-                <Rectangle Fill="#202124"/>
-                <TextBlock Margin="8 4 0 4" HorizontalAlignment="Left" Text="{x:Bind ItemKey.Year}" Style="{StaticResource TimelineTextStyle}"/>
-                <Border BorderThickness="2" BorderBrush="#26272B" VerticalAlignment="Bottom"/>
-
-                <ItemsRepeater Grid.Row="1" Grid.RowSpan="2" ItemsSource="{x:Bind Units}">
-                    <ItemsRepeater.Layout>
-                        <StackLayout Orientation="Horizontal"/>
-                    </ItemsRepeater.Layout>
-                    <ItemsRepeater.ItemTemplate>
-                        <DataTemplate x:DataType="models:TimelineItemBaseUnit">
-                            <Grid MinWidth="{Binding DataContext.MinItemsWidth, ElementName=itemsRepeater}"
-                                  Width="{Binding DataContext.ItemsWidth, ElementName=itemsRepeater}"
-                                  Background="{x:Bind support:XamlBindHelpers.GetAlternationColor(support:XamlBindHelpers.ColorBrushA, support:XamlBindHelpers.ColorBrushB)}">
-                                <Grid.RowDefinitions>
-                                    <RowDefinition Height="Auto"/>
-                                    <RowDefinition Height="*"/>
-                                </Grid.RowDefinitions>
-                                <TextBlock Text="{x:Bind support:StringFormatter.MonthNameConverter(Value)}" Style="{StaticResource TimelineTextStyle}"/>
-                                <FontIcon Grid.Row="1"
-                                          Visibility="{x:Bind support:XamlBindHelpers.CountToVisibility(Images)}"
-                                          Style="{StaticResource TimelineFontIconStyle}"/>
-                            </Grid>
-                        </DataTemplate>
-                    </ItemsRepeater.ItemTemplate>
-                </ItemsRepeater>
-                <Border Grid.RowSpan="3" BorderThickness="1" BorderBrush="#26272B" HorizontalAlignment="Left"/>
-            </Grid>
-        </DataTemplate>
-        
-        <DataTemplate x:Name="TimelineItemTemplateDaysOfMonth" x:DataType="models:TimelineItemDaysOfMonth">
-            <Grid PointerPressed="Item_PointerPressed"
-                  PointerMoved="Item_PointerMoved"
-                  PointerReleased="Item_PointerReleased"
-                  PointerCanceled="Item_PointerCanceled">
-                <Grid.RowDefinitions>
-                    <RowDefinition Height="Auto"/>
-                    <RowDefinition Height="Auto"/>
-                    <RowDefinition Height="*"/>
-                </Grid.RowDefinitions>
-
-                <Rectangle Fill="#202124"/>
-                <TextBlock Margin="8 4 0 4" HorizontalAlignment="Left"
-                           Text="{x:Bind support:StringFormatter.MonthAndYear(ItemKey.Month, ItemKey.Year)}"
-                            Style="{StaticResource TimelineTextStyle}"/>
-                <Border BorderThickness="2" BorderBrush="#26272B" VerticalAlignment="Bottom"/>
-
-                <ItemsRepeater Grid.Row="1" Grid.RowSpan="2" ItemsSource="{x:Bind Units}">
-                    <ItemsRepeater.Layout>
-                        <StackLayout Orientation="Horizontal"/>
-                    </ItemsRepeater.Layout>
-                    <ItemsRepeater.ItemTemplate>
-                        <DataTemplate x:DataType="models:TimelineItemBaseUnit">
-                            <Grid MinWidth="{Binding DataContext.MinItemsWidth, ElementName=itemsRepeater}"
-                                  Width="{Binding DataContext.ItemsWidth, ElementName=itemsRepeater}"
-                                  Background="{x:Bind support:XamlBindHelpers.GetAlternationColor(support:XamlBindHelpers.ColorBrushA, support:XamlBindHelpers.ColorBrushB)}">
-                                <Grid.RowDefinitions>
-                                    <RowDefinition Height="Auto"/>
-                                    <RowDefinition Height="*"/>
-                                </Grid.RowDefinitions>
-                                <TextBlock Text="{x:Bind Value}" Style="{StaticResource TimelineTextStyle}"/>
-                                <FontIcon Grid.Row="1"
-                                          Visibility="{x:Bind support:XamlBindHelpers.CountToVisibility(Images)}"
-                                          Style="{StaticResource TimelineFontIconStyle}"/>
-                            </Grid>
-                        </DataTemplate>
-                    </ItemsRepeater.ItemTemplate>
-                </ItemsRepeater>
-                <Border Grid.RowSpan="3" BorderThickness="1" BorderBrush="#26272B" HorizontalAlignment="Left"/>
-            </Grid>
-        </DataTemplate>
-
-        <support:MonthNameConverter x:Key="MonthNameConverter"/>
-        <support:TimelineItemTemplateSelector x:Key="TimelineItemTemplateSelector"
-                                              YearTemplate="{StaticResource TimelineItemTemplateYearsOfDecade}"
-                                              MonthTemplate="{StaticResource TimelineItemTemplateMonthsOfYear}"
-                                              DayTemplate="{StaticResource TimelineItemTemplateDaysOfMonth}"/>
-        <StackLayout x:Key="HorizontalStackLayout" Orientation="Horizontal"/>
     </UserControl.Resources>
 
     <Grid x:Name="root" Background="#2C2E2F">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
-            <RowDefinition Height="Auto"/>
             <RowDefinition Height="*"/>
         </Grid.RowDefinitions>
 
-        <TextBlock Margin="16 0 0 8" Text="Timeline view of pictures" FontSize="32" HorizontalAlignment="Left" Foreground="#F2F3F3"/>
+        <TextBlock Margin="16 0 0 8" Text="Timeline view of pictures" FontSize="32" HorizontalAlignment="Left" Foreground="#F2F3F3"/>        
+        <Border BorderThickness="1" VerticalAlignment="Bottom"/>
         
-        <Border Grid.Row="1" BorderThickness="1"/>
-        
-        <ScrollViewer x:Name="scrollViewer" Grid.Row="2"
+        <ScrollViewer x:Name="scrollViewer" Grid.Row="1"
                       HorizontalScrollBarVisibility="Auto"
                       VerticalScrollBarVisibility="Disabled"
                       IsVerticalScrollChainingEnabled="False">
             <ItemsRepeater x:Name="itemsRepeater"
                            ItemsSource="{Binding Items}"
-                           ItemTemplate="{StaticResource TimelineItemTemplateSelector}"
+                           ItemTemplate="{StaticResource TimelineItemTemplate}"
                            Layout="{StaticResource HorizontalStackLayout}"
-                           PointerWheelChanged="ItemsRepeater_PointerWheelChanged">
-            </ItemsRepeater>
-        </ScrollViewer>
-        
-        <Border Grid.Row="2"
-                HorizontalAlignment="Center"
-                BorderThickness="1"
-                PointerWheelChanged="ItemsRepeater_PointerWheelChanged"/>
+                           PointerWheelChanged="ItemsRepeater_PointerWheelChanged"/>
+        </ScrollViewer>        
+        <Border Grid.Row="2" HorizontalAlignment="Center" BorderThickness="1" PointerWheelChanged="ItemsRepeater_PointerWheelChanged"/>
     </Grid>
     
     <i:Interaction.Behaviors>

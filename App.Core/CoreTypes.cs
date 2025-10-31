@@ -42,11 +42,24 @@ namespace JpegViewer.App.Core.Types
     /// <summary>
     /// The type of timeline item.
     /// </summary>
-    public enum  ETimelineItemType
+    public enum ETimelineItemType
     {
         YearsOfDecade,
         MonthsOfYear,
         DaysOfMonth,
         HoursOfDay
+    }
+
+    /// <summary>
+    /// The type of the timeline base units.
+    /// </summary>
+    public enum ETimelineBaseUnitType
+    { 
+        Year,
+        Month,
+        Day,
+        Hour,
+        Minute,
+        Second
     }
 }

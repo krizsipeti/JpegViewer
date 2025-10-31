@@ -1,4 +1,6 @@
-﻿using System.Globalization;
+﻿using System;
+using System.Globalization;
+using JpegViewer.App.Core.Types;
 
 namespace JpegViewer.App.UI.Support
 {
@@ -34,9 +36,27 @@ namespace JpegViewer.App.UI.Support
             return CultureInfo.CurrentCulture.TextInfo.ToTitleCase(CultureInfo.CurrentCulture.DateTimeFormat.GetMonthName(month));
         }
 
+        public static string TimelineItemHeaderText(ETimelineItemType timelineItemType, DateTime itemKey)
+        {
+            return timelineItemType switch
+            {
+                ETimelineItemType.YearsOfDecade => YearRange(itemKey.Year, 10),
+                ETimelineItemType.MonthsOfYear => itemKey.Year.ToString(),
+                ETimelineItemType.DaysOfMonth => MonthAndYear(itemKey.Month, itemKey.Year),
+                _ => string.Empty
+            };
+        }
+
         /// <summary>
-        /// Increases the given integer value by n and returns it as a string.
+        /// Returns the unit text.
         /// </summary>
-        public static string IncreaseByN(int value, int n) => (value + n).ToString();
+        public static string TimeLineItemUnitText(ETimelineBaseUnitType type, int value)
+        {
+            return type switch
+            {
+                ETimelineBaseUnitType.Month => MonthNameConverter(value),
+                _ => value.ToString()
+            };
+        }
     }
 }

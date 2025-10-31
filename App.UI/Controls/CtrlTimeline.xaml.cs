@@ -4,7 +4,6 @@ using JpegViewer.App.Vmd.Controls;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Input;
-using Microsoft.UI.Xaml.Media;
 using Windows.System;
 
 namespace JpegViewer.App.UI.Controls

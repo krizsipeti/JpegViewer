@@ -209,17 +209,17 @@ namespace JpegViewer.App.Vmd.Controls
                     for (int year = decade; year < decade + 10; year++)
                     {
                         list.TryGetValue(year, out var images);
-                        baseUints.Add(new TimelineItemBaseUnit(year) { Images = images });
+                        baseUints.Add(new TimelineItemBaseUnit(ETimelineBaseUnitType.Year, year) { Images = images });
                     }
                 }
                 else
                 {
                     for (int year = decade; year < decade + 10; year++)
                     {
-                        baseUints.Add(new TimelineItemBaseUnit(year));
+                        baseUints.Add(new TimelineItemBaseUnit(ETimelineBaseUnitType.Year, year));
                     }
                 }
-                result.Add(new TimelineItemYearsOfDecade(decade, baseUints));
+                result.Add(new TimelineItem(new DateTime(decade, 1, 1), ETimelineItemType.YearsOfDecade, baseUints));
             }
             return result;
         }
@@ -247,17 +247,17 @@ namespace JpegViewer.App.Vmd.Controls
                     for (int month = 1; month <= 12; month++)
                     {
                         list.TryGetValue(month, out var images);
-                        baseUints.Add(new TimelineItemBaseUnit(month) { Images = images });
+                        baseUints.Add(new TimelineItemBaseUnit(ETimelineBaseUnitType.Month, month) { Images = images });
                     }
                 }
                 else
                 {
                     for (int month = 1; month <= 12; month++)
                     {
-                        baseUints.Add(new TimelineItemBaseUnit(month));
+                        baseUints.Add(new TimelineItemBaseUnit(ETimelineBaseUnitType.Month, month));
                     }
                 }
-                result.Add(new TimelineItemMonthsOfYear(year, baseUints));
+                result.Add(new TimelineItem(new DateTime(year, 1, 1), ETimelineItemType.MonthsOfYear, baseUints));
             }
             return result;
         }
@@ -287,17 +287,17 @@ namespace JpegViewer.App.Vmd.Controls
                         for (int day = 1; day <= DateTime.DaysInMonth(year, month); day++)
                         {
                             list.TryGetValue(day, out var images);
-                            baseUints.Add(new TimelineItemBaseUnit(day) { Images = images});
+                            baseUints.Add(new TimelineItemBaseUnit(ETimelineBaseUnitType.Day, day) { Images = images});
                         }
                     }
                     else
                     {
                         for (int day = 1; day <= DateTime.DaysInMonth(year, month); day++)
                         {
-                            baseUints.Add(new TimelineItemBaseUnit(day));
+                            baseUints.Add(new TimelineItemBaseUnit(ETimelineBaseUnitType.Day, day));
                         }
                     }
-                    result.Add(new TimelineItemDaysOfMonth(year, month, baseUints));
+                    result.Add(new TimelineItem(new DateTime(year, month, 1), ETimelineItemType.DaysOfMonth, baseUints));
                 }
             }
             return result;

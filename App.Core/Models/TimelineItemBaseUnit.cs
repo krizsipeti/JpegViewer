@@ -1,4 +1,5 @@
 ﻿using System.Collections.ObjectModel;
+using JpegViewer.App.Core.Types;
 
 namespace JpegViewer.App.Core.Models
 {
@@ -8,6 +9,11 @@ namespace JpegViewer.App.Core.Models
     /// </summary>
     public class TimelineItemBaseUnit
     {
+        /// <summary>
+        /// The type of this base unit.
+        /// </summary>
+        public ETimelineBaseUnitType Type { get; }
+
         /// <summary>
         /// The value of this item in base units.
         /// For example year, month, day, hour, etc.
@@ -23,8 +29,9 @@ namespace JpegViewer.App.Core.Models
         /// Create base unit with immutable value
         /// </summary>
         /// <param name="value"></param>
-        public TimelineItemBaseUnit(int value)
+        public TimelineItemBaseUnit(ETimelineBaseUnitType type, int value)
         {
+            Type = type;
             Value = value;
         }
     }
