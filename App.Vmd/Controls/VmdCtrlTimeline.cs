@@ -43,12 +43,17 @@ namespace JpegViewer.App.Vmd.Controls
         /// <summary>
         /// The minimum width allowed for the timeline items.
         /// </summary>
-        public double MinItemsWidth => 1000;
+        public double MinItemsWidth => 100;
 
         /// <summary>
         /// The maximum width allowed for the timeline items.
         /// </summary>
-        public double MaxItemsWidth => 2000;
+        public double MaxItemsWidth => 200;
+
+        /// <summary>
+        /// The zoom step applied on mouse wheel action.
+        /// </summary>
+        public double ZoomStep => 10;
 
         /// <summary>
         /// The current zoom level of the timeline.

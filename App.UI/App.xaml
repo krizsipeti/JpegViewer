@@ -11,6 +11,9 @@
                 <!-- Other merged dictionaries here -->
             </ResourceDictionary.MergedDictionaries>
             <!-- Other app resources here -->
+            
+            <SolidColorBrush x:Key="colorA" Color="#202124"/>
+            <SolidColorBrush x:Key="colorB" Color="#1F2024"/>
 
             <Style TargetType="Border">
                 <Setter Property="BorderBrush" Value="#3A3C3E"/>

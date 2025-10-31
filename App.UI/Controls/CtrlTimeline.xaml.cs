@@ -45,11 +45,6 @@ namespace JpegViewer.App.UI.Controls
         private DateTime LastTime { get; set; }
 
         /// <summary>
-        /// Scale transform for zooming the timeline content.
-        /// </summary>
-        private ScaleTransform ScaleTransform { get; } = new ScaleTransform();
-
-        /// <summary>
         /// Initializes a new instance of the <see cref="CtrlTimeline"/> class.
         /// </summary>
         public CtrlTimeline()
@@ -77,7 +72,7 @@ namespace JpegViewer.App.UI.Controls
                     return;
                 }
 
-                double zoomStep = 100; // adjust sensitivity
+                double zoomStep = vmdCtrlTimeline.ZoomStep; // adjust sensitivity
                 double change = (delta > 0) ? zoomStep : -zoomStep;
                 if (vmdCtrlTimeline.ItemsWidth + change > vmdCtrlTimeline.MaxItemsWidth)
                 {

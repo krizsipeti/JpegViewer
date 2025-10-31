@@ -12,12 +12,12 @@
     xmlns:support="using:JpegViewer.App.UI.Support"
     xmlns:types="using:JpegViewer.App.Core.Types"
     mc:Ignorable="d"
+    x:Name="rootCtrl"
     Height="300">
 
     <UserControl.Resources>
-        <Style TargetType="TextBlock">
+        <Style TargetType="TextBlock" x:Name="TimelineTextStyle">
             <Setter Property="Margin" Value="0 4 0 4"/>
-            <Setter Property="Grid.Row" Value="1"/>
             <Setter Property="HorizontalTextAlignment" Value="Center"/>
             <Setter Property="Foreground" Value="#9EA0A2"/>
             <Setter Property="FontFamily" Value="Segoe UI Variable"/>
@@ -26,25 +26,19 @@
         </Style>
         <Style TargetType="Rectangle" x:Name="RectA">
             <Setter Property="Fill" Value="#202124"/>
-            <Setter Property="Grid.RowSpan" Value="2"/>
-            <Setter Property="Grid.Row" Value="1"/>
         </Style>
         <Style TargetType="Rectangle" x:Name="RectB">
             <Setter Property="Fill" Value="#1F2024"/>
-            <Setter Property="Grid.RowSpan" Value="2"/>
-            <Setter Property="Grid.Row" Value="1"/>
         </Style>
-        <Style TargetType="FontIcon">
+        <Style TargetType="FontIcon" x:Name="TimelineFontIconStyle">
             <Setter Property="FontFamily" Value="Segoe Fluent Icons"/>
-            <Setter Property="Grid.Row" Value="2"/>
             <Setter Property="FontSize" Value="32"/>
             <Setter Property="Foreground" Value="#9EA0A2"/>
             <Setter Property="Glyph" Value="&#xe91b;"/>
         </Style>
 
         <DataTemplate x:Name="TimelineItemTemplateYearsOfDecade" x:DataType="models:TimelineItemYearsOfDecade">
-            <Grid MinWidth="{Binding DataContext.MinItemsWidth, ElementName=itemsRepeater}" Width="{Binding DataContext.ItemsWidth, ElementName=itemsRepeater}"
-                  PointerPressed="Item_PointerPressed"
+            <Grid PointerPressed="Item_PointerPressed"
                   PointerMoved="Item_PointerMoved"
                   PointerReleased="Item_PointerReleased"
                   PointerCanceled="Item_PointerCanceled">
@@ -53,60 +47,40 @@
                     <RowDefinition Height="Auto"/>
                     <RowDefinition Height="*"/>
                 </Grid.RowDefinitions>
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="*"/>
-                    <ColumnDefinition Width="*"/>
-                    <ColumnDefinition Width="*"/>
-                    <ColumnDefinition Width="*"/>
-                    <ColumnDefinition Width="*"/>
-                    <ColumnDefinition Width="*"/>
-                    <ColumnDefinition Width="*"/>
-                    <ColumnDefinition Width="*"/>
-                    <ColumnDefinition Width="*"/>
-                    <ColumnDefinition Width="*"/>
-                </Grid.ColumnDefinitions>
 
-                <Rectangle Grid.ColumnSpan="10" Fill="#202124"/>
-                <TextBlock Grid.Row="0" Grid.ColumnSpan="10" Margin="8 4 0 4" HorizontalAlignment="Left" Text="{x:Bind support:StringFormatter.YearRange(ItemKey.Year, 10)}"/>
-                <Border Grid.ColumnSpan="10" BorderThickness="2" BorderBrush="#26272B" VerticalAlignment="Bottom"/>
+                <Rectangle Fill="#202124"/>
+                <TextBlock Margin="8 4 0 4"
+                           HorizontalAlignment="Left" Text="{x:Bind support:StringFormatter.YearRange(ItemKey.Year, 10)}"
+                           Style="{StaticResource TimelineTextStyle}"/>
+                <Border BorderThickness="2" BorderBrush="#26272B" VerticalAlignment="Bottom"/>
 
-                <Rectangle Style="{StaticResource RectA}"/>
-                <Rectangle Grid.Column="1" Style="{StaticResource RectB}"/>
-                <Rectangle Grid.Column="2" Style="{StaticResource RectA}"/>
-                <Rectangle Grid.Column="3" Style="{StaticResource RectB}"/>
-                <Rectangle Grid.Column="4" Style="{StaticResource RectA}"/>
-                <Rectangle Grid.Column="5" Style="{StaticResource RectB}"/>
-                <Rectangle Grid.Column="6" Style="{StaticResource RectA}"/>
-                <Rectangle Grid.Column="7" Style="{StaticResource RectB}"/>
-                <Rectangle Grid.Column="8" Style="{StaticResource RectA}"/>
-                <Rectangle Grid.Column="9" Style="{StaticResource RectB}"/>
-                <TextBlock Text="{x:Bind ItemKey.Year}"/>
-                <TextBlock Grid.Column="1" Text="{x:Bind support:StringFormatter.IncreaseByN(ItemKey.Year, 1)}"/>
-                <TextBlock Grid.Column="2" Text="{x:Bind support:StringFormatter.IncreaseByN(ItemKey.Year, 2)}"/>
-                <TextBlock Grid.Column="3" Text="{x:Bind support:StringFormatter.IncreaseByN(ItemKey.Year, 3)}"/>
-                <TextBlock Grid.Column="4" Text="{x:Bind support:StringFormatter.IncreaseByN(ItemKey.Year, 4)}"/>
-                <TextBlock Grid.Column="5" Text="{x:Bind support:StringFormatter.IncreaseByN(ItemKey.Year, 5)}"/>
-                <TextBlock Grid.Column="6" Text="{x:Bind support:StringFormatter.IncreaseByN(ItemKey.Year, 6)}"/>
-                <TextBlock Grid.Column="7" Text="{x:Bind support:StringFormatter.IncreaseByN(ItemKey.Year, 7)}"/>
-                <TextBlock Grid.Column="8" Text="{x:Bind support:StringFormatter.IncreaseByN(ItemKey.Year, 8)}"/>
-                <TextBlock Grid.Column="9" Text="{x:Bind support:StringFormatter.IncreaseByN(ItemKey.Year, 9)}"/>
-                <FontIcon Visibility="{x:Bind support:XamlBindHelpers.CountToVisibility(Units, 0)}" />
-                <FontIcon Grid.Column="1" Visibility="{x:Bind support:XamlBindHelpers.CountToVisibility(Units, 1)}"/>
-                <FontIcon Grid.Column="2" Visibility="{x:Bind support:XamlBindHelpers.CountToVisibility(Units, 2)}"/>
-                <FontIcon Grid.Column="3" Visibility="{x:Bind support:XamlBindHelpers.CountToVisibility(Units, 3)}"/>
-                <FontIcon Grid.Column="4" Visibility="{x:Bind support:XamlBindHelpers.CountToVisibility(Units, 4)}"/>
-                <FontIcon Grid.Column="5" Visibility="{x:Bind support:XamlBindHelpers.CountToVisibility(Units, 5)}"/>
-                <FontIcon Grid.Column="6" Visibility="{x:Bind support:XamlBindHelpers.CountToVisibility(Units, 6)}"/>
-                <FontIcon Grid.Column="7" Visibility="{x:Bind support:XamlBindHelpers.CountToVisibility(Units, 7)}"/>
-                <FontIcon Grid.Column="8" Visibility="{x:Bind support:XamlBindHelpers.CountToVisibility(Units, 8)}"/>
-                <FontIcon Grid.Column="9" Visibility="{x:Bind support:XamlBindHelpers.CountToVisibility(Units, 9)}"/>
+                <ItemsRepeater Grid.Row="1" Grid.RowSpan="2" ItemsSource="{x:Bind Units}">
+                    <ItemsRepeater.Layout>
+                        <StackLayout Orientation="Horizontal"/>
+                    </ItemsRepeater.Layout>
+                    <ItemsRepeater.ItemTemplate>
+                        <DataTemplate x:DataType="models:TimelineItemBaseUnit">
+                            <Grid MinWidth="{Binding DataContext.MinItemsWidth, ElementName=itemsRepeater}"
+                                  Width="{Binding DataContext.ItemsWidth, ElementName=itemsRepeater}"
+                                  Background="{x:Bind support:XamlBindHelpers.GetAlternationColor(support:XamlBindHelpers.ColorBrushA, support:XamlBindHelpers.ColorBrushB)}">
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="Auto"/>
+                                    <RowDefinition Height="*"/>
+                                </Grid.RowDefinitions>
+                                <TextBlock Text="{x:Bind Value}" Style="{StaticResource TimelineTextStyle}"/>
+                                <FontIcon Grid.Row="1"
+                                          Visibility="{x:Bind support:XamlBindHelpers.CountToVisibility(Images)}"
+                                          Style="{StaticResource TimelineFontIconStyle}"/>
+                            </Grid>
+                        </DataTemplate>
+                    </ItemsRepeater.ItemTemplate>
+                </ItemsRepeater>
                 <Border Grid.RowSpan="3" BorderThickness="1" BorderBrush="#26272B" HorizontalAlignment="Left"/>
             </Grid>
         </DataTemplate>
 
         <DataTemplate x:Name="TimelineItemTemplateMonthsOfYear" x:DataType="models:TimelineItemMonthsOfYear">
-            <Grid MinWidth="{Binding DataContext.MinItemsWidth, ElementName=itemsRepeater}" Width="{Binding DataContext.ItemsWidth, ElementName=itemsRepeater}"
-                  PointerPressed="Item_PointerPressed"
+            <Grid PointerPressed="Item_PointerPressed"
                   PointerMoved="Item_PointerMoved"
                   PointerReleased="Item_PointerReleased"
                   PointerCanceled="Item_PointerCanceled">
@@ -115,68 +89,38 @@
                     <RowDefinition Height="Auto"/>
                     <RowDefinition Height="*"/>
                 </Grid.RowDefinitions>
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="*"/>
-                    <ColumnDefinition Width="*"/>
-                    <ColumnDefinition Width="*"/>
-                    <ColumnDefinition Width="*"/>
-                    <ColumnDefinition Width="*"/>
-                    <ColumnDefinition Width="*"/>
-                    <ColumnDefinition Width="*"/>
-                    <ColumnDefinition Width="*"/>
-                    <ColumnDefinition Width="*"/>
-                    <ColumnDefinition Width="*"/>
-                    <ColumnDefinition Width="*"/>
-                    <ColumnDefinition Width="*"/>
-                </Grid.ColumnDefinitions>
 
-                <Rectangle Grid.ColumnSpan="12" Fill="#202124"/>
-                <TextBlock Grid.Row="0" Grid.ColumnSpan="12" Margin="8 4 0 4" HorizontalAlignment="Left" Text="{x:Bind ItemKey.Year}"/>
-                <Border Grid.ColumnSpan="12" BorderThickness="2" BorderBrush="#26272B" VerticalAlignment="Bottom"/>
+                <Rectangle Fill="#202124"/>
+                <TextBlock Margin="8 4 0 4" HorizontalAlignment="Left" Text="{x:Bind ItemKey.Year}" Style="{StaticResource TimelineTextStyle}"/>
+                <Border BorderThickness="2" BorderBrush="#26272B" VerticalAlignment="Bottom"/>
 
-                <Rectangle Style="{StaticResource RectA}"/>
-                <TextBlock Text="{x:Bind support:StringFormatter.MonthNameConverter(1)}"/>
-                <Rectangle Grid.Column="1" Style="{StaticResource RectB}"/>
-                <TextBlock Grid.Column="1" Text="{x:Bind support:StringFormatter.MonthNameConverter(2)}"/>
-                <Rectangle Grid.Column="2" Style="{StaticResource RectA}"/>
-                <TextBlock Grid.Column="2" Text="{x:Bind support:StringFormatter.MonthNameConverter(3)}"/>
-                <Rectangle Grid.Column="3" Style="{StaticResource RectB}"/>
-                <TextBlock Grid.Column="3" Text="{x:Bind support:StringFormatter.MonthNameConverter(4)}"/>
-                <Rectangle Grid.Column="4" Style="{StaticResource RectA}"/>
-                <TextBlock Grid.Column="4" Text="{x:Bind support:StringFormatter.MonthNameConverter(5)}"/>
-                <Rectangle Grid.Column="5" Style="{StaticResource RectB}"/>
-                <TextBlock Grid.Column="5" Text="{x:Bind support:StringFormatter.MonthNameConverter(6)}"/>
-                <Rectangle Grid.Column="6" Style="{StaticResource RectA}"/>
-                <TextBlock Grid.Column="6" Text="{x:Bind support:StringFormatter.MonthNameConverter(7)}"/>
-                <Rectangle Grid.Column="7" Style="{StaticResource RectB}"/>
-                <TextBlock Grid.Column="7" Text="{x:Bind support:StringFormatter.MonthNameConverter(8)}"/>
-                <Rectangle Grid.Column="8" Style="{StaticResource RectA}"/>
-                <TextBlock Grid.Column="8" Text="{x:Bind support:StringFormatter.MonthNameConverter(9)}"/>
-                <Rectangle Grid.Column="9" Style="{StaticResource RectB}"/>
-                <TextBlock Grid.Column="9" Text="{x:Bind support:StringFormatter.MonthNameConverter(10)}"/>
-                <Rectangle Grid.Column="10" Style="{StaticResource RectA}"/>
-                <TextBlock Grid.Column="10" Text="{x:Bind support:StringFormatter.MonthNameConverter(11)}"/>
-                <Rectangle Grid.Column="11" Style="{StaticResource RectB}"/>
-                <TextBlock Grid.Column="11" Text="{x:Bind support:StringFormatter.MonthNameConverter(12)}"/>
-                <FontIcon Visibility="{x:Bind support:XamlBindHelpers.CountToVisibility(Units, 0)}" />
-                <FontIcon Grid.Column="1" Visibility="{x:Bind support:XamlBindHelpers.CountToVisibility(Units, 1)}"/>
-                <FontIcon Grid.Column="2" Visibility="{x:Bind support:XamlBindHelpers.CountToVisibility(Units, 2)}"/>
-                <FontIcon Grid.Column="3" Visibility="{x:Bind support:XamlBindHelpers.CountToVisibility(Units, 3)}"/>
-                <FontIcon Grid.Column="4" Visibility="{x:Bind support:XamlBindHelpers.CountToVisibility(Units, 4)}"/>
-                <FontIcon Grid.Column="5" Visibility="{x:Bind support:XamlBindHelpers.CountToVisibility(Units, 5)}"/>
-                <FontIcon Grid.Column="6" Visibility="{x:Bind support:XamlBindHelpers.CountToVisibility(Units, 6)}"/>
-                <FontIcon Grid.Column="7" Visibility="{x:Bind support:XamlBindHelpers.CountToVisibility(Units, 7)}"/>
-                <FontIcon Grid.Column="8" Visibility="{x:Bind support:XamlBindHelpers.CountToVisibility(Units, 8)}"/>
-                <FontIcon Grid.Column="9" Visibility="{x:Bind support:XamlBindHelpers.CountToVisibility(Units, 9)}"/>
-                <FontIcon Grid.Column="10" Visibility="{x:Bind support:XamlBindHelpers.CountToVisibility(Units, 10)}"/>
-                <FontIcon Grid.Column="11" Visibility="{x:Bind support:XamlBindHelpers.CountToVisibility(Units, 11)}"/>
+                <ItemsRepeater Grid.Row="1" Grid.RowSpan="2" ItemsSource="{x:Bind Units}">
+                    <ItemsRepeater.Layout>
+                        <StackLayout Orientation="Horizontal"/>
+                    </ItemsRepeater.Layout>
+                    <ItemsRepeater.ItemTemplate>
+                        <DataTemplate x:DataType="models:TimelineItemBaseUnit">
+                            <Grid MinWidth="{Binding DataContext.MinItemsWidth, ElementName=itemsRepeater}"
+                                  Width="{Binding DataContext.ItemsWidth, ElementName=itemsRepeater}"
+                                  Background="{x:Bind support:XamlBindHelpers.GetAlternationColor(support:XamlBindHelpers.ColorBrushA, support:XamlBindHelpers.ColorBrushB)}">
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="Auto"/>
+                                    <RowDefinition Height="*"/>
+                                </Grid.RowDefinitions>
+                                <TextBlock Text="{x:Bind support:StringFormatter.MonthNameConverter(Value)}" Style="{StaticResource TimelineTextStyle}"/>
+                                <FontIcon Grid.Row="1"
+                                          Visibility="{x:Bind support:XamlBindHelpers.CountToVisibility(Images)}"
+                                          Style="{StaticResource TimelineFontIconStyle}"/>
+                            </Grid>
+                        </DataTemplate>
+                    </ItemsRepeater.ItemTemplate>
+                </ItemsRepeater>
                 <Border Grid.RowSpan="3" BorderThickness="1" BorderBrush="#26272B" HorizontalAlignment="Left"/>
             </Grid>
         </DataTemplate>
         
         <DataTemplate x:Name="TimelineItemTemplateDaysOfMonth" x:DataType="models:TimelineItemDaysOfMonth">
-            <Grid MinWidth="{Binding DataContext.MinItemsWidth, ElementName=itemsRepeater}" Width="{Binding DataContext.ItemsWidth, ElementName=itemsRepeater}"
-                  PointerPressed="Item_PointerPressed"
+            <Grid PointerPressed="Item_PointerPressed"
                   PointerMoved="Item_PointerMoved"
                   PointerReleased="Item_PointerReleased"
                   PointerCanceled="Item_PointerCanceled">
@@ -185,137 +129,34 @@
                     <RowDefinition Height="Auto"/>
                     <RowDefinition Height="*"/>
                 </Grid.RowDefinitions>
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="*"/>
-                    <ColumnDefinition Width="*"/>
-                    <ColumnDefinition Width="*"/>
-                    <ColumnDefinition Width="*"/>
-                    <ColumnDefinition Width="*"/>
-                    <ColumnDefinition Width="*"/>
-                    <ColumnDefinition Width="*"/>
-                    <ColumnDefinition Width="*"/>
-                    <ColumnDefinition Width="*"/>
-                    <ColumnDefinition Width="*"/>
-                    <ColumnDefinition Width="*"/>
-                    <ColumnDefinition Width="*"/>
-                    <ColumnDefinition Width="*"/>
-                    <ColumnDefinition Width="*"/>
-                    <ColumnDefinition Width="*"/>
-                    <ColumnDefinition Width="*"/>
-                    <ColumnDefinition Width="*"/>
-                    <ColumnDefinition Width="*"/>
-                    <ColumnDefinition Width="*"/>
-                    <ColumnDefinition Width="*"/>
-                    <ColumnDefinition Width="*"/>
-                    <ColumnDefinition Width="*"/>
-                    <ColumnDefinition Width="*"/>
-                    <ColumnDefinition Width="*"/>
-                    <ColumnDefinition Width="*"/>
-                    <ColumnDefinition Width="*"/>
-                    <ColumnDefinition Width="*"/>
-                    <ColumnDefinition Width="*"/>
-                    <ColumnDefinition Width="{x:Bind support:XamlBindHelpers.AutoOrStarForGridDayColumnWidth(ItemKey.Year, ItemKey.Month, 29)}"/>
-                    <ColumnDefinition Width="{x:Bind support:XamlBindHelpers.AutoOrStarForGridDayColumnWidth(ItemKey.Year, ItemKey.Month, 30)}"/>
-                    <ColumnDefinition Width="{x:Bind support:XamlBindHelpers.AutoOrStarForGridDayColumnWidth(ItemKey.Year, ItemKey.Month, 31)}"/>
-                </Grid.ColumnDefinitions>
 
-                <Rectangle Grid.ColumnSpan="31" Fill="#202124"/>
-                <TextBlock Grid.Row="0" Grid.ColumnSpan="31" Margin="8 4 0 4" HorizontalAlignment="Left" Text="{x:Bind support:StringFormatter.MonthAndYear(ItemKey.Month, ItemKey.Year)}"/>
-                <Border Grid.ColumnSpan="31" BorderThickness="2" BorderBrush="#26272B" VerticalAlignment="Bottom"/>
+                <Rectangle Fill="#202124"/>
+                <TextBlock Margin="8 4 0 4" HorizontalAlignment="Left"
+                           Text="{x:Bind support:StringFormatter.MonthAndYear(ItemKey.Month, ItemKey.Year)}"
+                            Style="{StaticResource TimelineTextStyle}"/>
+                <Border BorderThickness="2" BorderBrush="#26272B" VerticalAlignment="Bottom"/>
 
-                <Rectangle Style="{StaticResource RectA}"/>
-                <TextBlock Text="1"/>
-                <Rectangle Grid.Column="1" Style="{StaticResource RectB}"/>
-                <TextBlock Grid.Column="1" Text="2"/>
-                <Rectangle Grid.Column="2" Style="{StaticResource RectA}"/>
-                <TextBlock Grid.Column="2" Text="3"/>
-                <Rectangle Grid.Column="3" Style="{StaticResource RectB}"/>
-                <TextBlock Grid.Column="3" Text="4"/>
-                <Rectangle Grid.Column="4" Style="{StaticResource RectA}"/>
-                <TextBlock Grid.Column="4" Text="5"/>
-                <Rectangle Grid.Column="5" Style="{StaticResource RectB}"/>
-                <TextBlock Grid.Column="5" Text="6"/>
-                <Rectangle Grid.Column="6" Style="{StaticResource RectA}"/>
-                <TextBlock Grid.Column="6" Text="7"/>
-                <Rectangle Grid.Column="7" Style="{StaticResource RectB}"/>
-                <TextBlock Grid.Column="7" Text="8"/>
-                <Rectangle Grid.Column="8" Style="{StaticResource RectA}"/>
-                <TextBlock Grid.Column="8" Text="9"/>
-                <Rectangle Grid.Column="9" Style="{StaticResource RectB}"/>
-                <TextBlock Grid.Column="9" Text="10"/>
-                <Rectangle Grid.Column="10" Style="{StaticResource RectA}"/>
-                <TextBlock Grid.Column="10" Text="11"/>
-                <Rectangle Grid.Column="11" Style="{StaticResource RectB}"/>
-                <TextBlock Grid.Column="11" Text="12"/>
-                <Rectangle Grid.Column="12" Style="{StaticResource RectA}"/>
-                <TextBlock Grid.Column="12" Text="13"/>
-                <Rectangle Grid.Column="13" Style="{StaticResource RectB}"/>
-                <TextBlock Grid.Column="13" Text="14"/>
-                <Rectangle Grid.Column="14" Style="{StaticResource RectA}"/>
-                <TextBlock Grid.Column="14" Text="15"/>
-                <Rectangle Grid.Column="15" Style="{StaticResource RectB}"/>
-                <TextBlock Grid.Column="15" Text="16"/>
-                <Rectangle Grid.Column="16" Style="{StaticResource RectA}"/>
-                <TextBlock Grid.Column="16" Text="17"/>
-                <Rectangle Grid.Column="17" Style="{StaticResource RectB}"/>
-                <TextBlock Grid.Column="17" Text="18"/>
-                <Rectangle Grid.Column="18" Style="{StaticResource RectA}"/>
-                <TextBlock Grid.Column="18" Text="19"/>
-                <Rectangle Grid.Column="19" Style="{StaticResource RectB}"/>
-                <TextBlock Grid.Column="19" Text="20"/>
-                <Rectangle Grid.Column="20" Style="{StaticResource RectA}"/>
-                <TextBlock Grid.Column="20" Text="21"/>
-                <Rectangle Grid.Column="21" Style="{StaticResource RectB}"/>
-                <TextBlock Grid.Column="21" Text="22"/>
-                <Rectangle Grid.Column="22" Style="{StaticResource RectA}"/>
-                <TextBlock Grid.Column="22" Text="23"/>
-                <Rectangle Grid.Column="23" Style="{StaticResource RectB}"/>
-                <TextBlock Grid.Column="23" Text="24"/>
-                <Rectangle Grid.Column="24" Style="{StaticResource RectA}"/>
-                <TextBlock Grid.Column="24" Text="25"/>
-                <Rectangle Grid.Column="25" Style="{StaticResource RectB}"/>
-                <TextBlock Grid.Column="25" Text="26"/>
-                <Rectangle Grid.Column="26" Style="{StaticResource RectA}"/>
-                <TextBlock Grid.Column="26" Text="27"/>
-                <Rectangle Grid.Column="27" Style="{StaticResource RectB}"/>
-                <TextBlock Grid.Column="27" Text="28"/>
-                <Rectangle Grid.Column="28" x:Name="r29" Style="{StaticResource RectA}" Visibility="{x:Bind support:XamlBindHelpers.IsDayVisible(ItemKey.Year, ItemKey.Month, 29)}"/>
-                <TextBlock Grid.Column="28" Text="29" Visibility="{Binding Visibility, ElementName=r29}"/>
-                <Rectangle Grid.Column="29" x:Name="r30" Style="{StaticResource RectB}" Visibility="{x:Bind support:XamlBindHelpers.IsDayVisible(ItemKey.Year, ItemKey.Month, 30)}"/>
-                <TextBlock Grid.Column="29" Text="30" Visibility="{Binding Visibility, ElementName=r30}"/>
-                <Rectangle Grid.Column="30" x:Name="r31" Style="{StaticResource RectA}" Visibility="{x:Bind support:XamlBindHelpers.IsDayVisible(ItemKey.Year, ItemKey.Month, 31)}"/>
-                <TextBlock Grid.Column="30" Text="31" Visibility="{Binding Visibility, ElementName=r31}"/>
-                <FontIcon Grid.Column="0" Visibility="{x:Bind support:XamlBindHelpers.CountToVisibility(Units, 0)}"/>
-                <FontIcon Grid.Column="1" Visibility="{x:Bind support:XamlBindHelpers.CountToVisibility(Units, 1)}"/>
-                <FontIcon Grid.Column="2" Visibility="{x:Bind support:XamlBindHelpers.CountToVisibility(Units, 2)}"/>
-                <FontIcon Grid.Column="3" Visibility="{x:Bind support:XamlBindHelpers.CountToVisibility(Units, 3)}"/>
-                <FontIcon Grid.Column="4" Visibility="{x:Bind support:XamlBindHelpers.CountToVisibility(Units, 4)}"/>
-                <FontIcon Grid.Column="5" Visibility="{x:Bind support:XamlBindHelpers.CountToVisibility(Units, 5)}"/>
-                <FontIcon Grid.Column="6" Visibility="{x:Bind support:XamlBindHelpers.CountToVisibility(Units, 6)}"/>
-                <FontIcon Grid.Column="7" Visibility="{x:Bind support:XamlBindHelpers.CountToVisibility(Units, 7)}"/>
-                <FontIcon Grid.Column="8" Visibility="{x:Bind support:XamlBindHelpers.CountToVisibility(Units, 8)}"/>
-                <FontIcon Grid.Column="9" Visibility="{x:Bind support:XamlBindHelpers.CountToVisibility(Units, 9)}"/>
-                <FontIcon Grid.Column="10" Visibility="{x:Bind support:XamlBindHelpers.CountToVisibility(Units, 10)}"/>
-                <FontIcon Grid.Column="11" Visibility="{x:Bind support:XamlBindHelpers.CountToVisibility(Units, 11)}"/>
-                <FontIcon Grid.Column="12" Visibility="{x:Bind support:XamlBindHelpers.CountToVisibility(Units, 12)}"/>
-                <FontIcon Grid.Column="13" Visibility="{x:Bind support:XamlBindHelpers.CountToVisibility(Units, 13)}"/>
-                <FontIcon Grid.Column="14" Visibility="{x:Bind support:XamlBindHelpers.CountToVisibility(Units, 14)}"/>
-                <FontIcon Grid.Column="15" Visibility="{x:Bind support:XamlBindHelpers.CountToVisibility(Units, 15)}"/>
-                <FontIcon Grid.Column="16" Visibility="{x:Bind support:XamlBindHelpers.CountToVisibility(Units, 16)}"/>
-                <FontIcon Grid.Column="17" Visibility="{x:Bind support:XamlBindHelpers.CountToVisibility(Units, 17)}"/>
-                <FontIcon Grid.Column="18" Visibility="{x:Bind support:XamlBindHelpers.CountToVisibility(Units, 18)}"/>
-                <FontIcon Grid.Column="19" Visibility="{x:Bind support:XamlBindHelpers.CountToVisibility(Units, 19)}"/>
-                <FontIcon Grid.Column="20" Visibility="{x:Bind support:XamlBindHelpers.CountToVisibility(Units, 20)}"/>
-                <FontIcon Grid.Column="21" Visibility="{x:Bind support:XamlBindHelpers.CountToVisibility(Units, 21)}"/>
-                <FontIcon Grid.Column="22" Visibility="{x:Bind support:XamlBindHelpers.CountToVisibility(Units, 22)}"/>
-                <FontIcon Grid.Column="23" Visibility="{x:Bind support:XamlBindHelpers.CountToVisibility(Units, 23)}"/>
-                <FontIcon Grid.Column="24" Visibility="{x:Bind support:XamlBindHelpers.CountToVisibility(Units, 24)}"/>
-                <FontIcon Grid.Column="25" Visibility="{x:Bind support:XamlBindHelpers.CountToVisibility(Units, 25)}"/>
-                <FontIcon Grid.Column="26" Visibility="{x:Bind support:XamlBindHelpers.CountToVisibility(Units, 26)}"/>
-                <FontIcon Grid.Column="27" Visibility="{x:Bind support:XamlBindHelpers.CountToVisibility(Units, 27)}"/>
-                <FontIcon Grid.Column="28" Visibility="{x:Bind support:XamlBindHelpers.CountToVisibility(Units, 28)}"/>
-                <FontIcon Grid.Column="29" Visibility="{x:Bind support:XamlBindHelpers.CountToVisibility(Units, 29)}"/>
-                <FontIcon Grid.Column="30" Visibility="{x:Bind support:XamlBindHelpers.CountToVisibility(Units, 30)}"/>
+                <ItemsRepeater Grid.Row="1" Grid.RowSpan="2" ItemsSource="{x:Bind Units}">
+                    <ItemsRepeater.Layout>
+                        <StackLayout Orientation="Horizontal"/>
+                    </ItemsRepeater.Layout>
+                    <ItemsRepeater.ItemTemplate>
+                        <DataTemplate x:DataType="models:TimelineItemBaseUnit">
+                            <Grid MinWidth="{Binding DataContext.MinItemsWidth, ElementName=itemsRepeater}"
+                                  Width="{Binding DataContext.ItemsWidth, ElementName=itemsRepeater}"
+                                  Background="{x:Bind support:XamlBindHelpers.GetAlternationColor(support:XamlBindHelpers.ColorBrushA, support:XamlBindHelpers.ColorBrushB)}">
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="Auto"/>
+                                    <RowDefinition Height="*"/>
+                                </Grid.RowDefinitions>
+                                <TextBlock Text="{x:Bind Value}" Style="{StaticResource TimelineTextStyle}"/>
+                                <FontIcon Grid.Row="1"
+                                          Visibility="{x:Bind support:XamlBindHelpers.CountToVisibility(Images)}"
+                                          Style="{StaticResource TimelineFontIconStyle}"/>
+                            </Grid>
+                        </DataTemplate>
+                    </ItemsRepeater.ItemTemplate>
+                </ItemsRepeater>
                 <Border Grid.RowSpan="3" BorderThickness="1" BorderBrush="#26272B" HorizontalAlignment="Left"/>
             </Grid>
         </DataTemplate>
