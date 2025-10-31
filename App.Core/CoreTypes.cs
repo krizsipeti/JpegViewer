@@ -36,7 +36,8 @@ namespace JpegViewer.App.Core.Types
         Months,
         Days,
         Hours,
-        Minutes
+        Minutes,
+        Seconds
     }
 
     /// <summary>
@@ -47,7 +48,9 @@ namespace JpegViewer.App.Core.Types
         YearsOfDecade,
         MonthsOfYear,
         DaysOfMonth,
-        HoursOfDay
+        HoursOfDay,
+        MinutesOfHour,
+        SecondsOfMinute
     }
 
     /// <summary>

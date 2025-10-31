@@ -12,9 +12,6 @@ namespace JpegViewer.App.UI.Support
         /// <summary>
         /// Gets a year range string based on the start year and range.
         /// </summary>
-        /// <param name="startYear"></param>
-        /// <param name="range"></param>
-        /// <returns></returns>
         public static string YearRange(int startYear, int range) => range > 1 ? $"{startYear} - {(startYear + (range - 1))}" : startYear.ToString();
 
         /// <summary>
@@ -25,8 +22,6 @@ namespace JpegViewer.App.UI.Support
         /// <summary>
         /// Returns the localized month name for the given month integer (1-12).
         /// </summary>
-        /// <param name="month"></param>
-        /// <returns></returns>
         public static string MonthNameConverter(int month)
         {
             if (month < 1 || month > 12)
@@ -36,6 +31,9 @@ namespace JpegViewer.App.UI.Support
             return CultureInfo.CurrentCulture.TextInfo.ToTitleCase(CultureInfo.CurrentCulture.DateTimeFormat.GetMonthName(month));
         }
 
+        /// <summary>
+        /// Composes a header text for the current timeline item type.
+        /// </summary>
         public static string TimelineItemHeaderText(ETimelineItemType timelineItemType, DateTime itemKey)
         {
             return timelineItemType switch
@@ -43,6 +41,9 @@ namespace JpegViewer.App.UI.Support
                 ETimelineItemType.YearsOfDecade => YearRange(itemKey.Year, 10),
                 ETimelineItemType.MonthsOfYear => itemKey.Year.ToString(),
                 ETimelineItemType.DaysOfMonth => MonthAndYear(itemKey.Month, itemKey.Year),
+                ETimelineItemType.HoursOfDay => itemKey.ToString("D"),
+                ETimelineItemType.MinutesOfHour => itemKey.ToString("F"),
+                ETimelineItemType.SecondsOfMinute => itemKey.ToString("F"),
                 _ => string.Empty
             };
         }

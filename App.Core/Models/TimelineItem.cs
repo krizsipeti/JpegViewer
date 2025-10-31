@@ -23,6 +23,31 @@ namespace JpegViewer.App.Core.Models
         public ETimelineItemType ItemType { get; }
 
         /// <summary>
+        /// Returns the end time of this timeline item.
+        /// </summary>
+        public DateTime EndTime
+        {
+            get
+            {
+                return ItemType switch
+                {
+                    ETimelineItemType.YearsOfDecade => ItemKey.AddYears(Units.Count),
+                    ETimelineItemType.MonthsOfYear => ItemKey.AddMonths(Units.Count),
+                    ETimelineItemType.DaysOfMonth => ItemKey.AddDays(Units.Count),
+                    ETimelineItemType.HoursOfDay => ItemKey.AddHours(Units.Count),
+                    ETimelineItemType.MinutesOfHour => ItemKey.AddMinutes(Units.Count),
+                    ETimelineItemType.SecondsOfMinute => ItemKey.AddSeconds(Units.Count),
+                    _ => ItemKey
+                };
+            }
+        }
+
+        /// <summary>
+        /// Calculates the duration of this timeline item.
+        /// </summary>
+        public TimeSpan Duration { get => EndTime - ItemKey; }
+
+        /// <summary>
         /// Images associated with this timeline item groupped by the item's sub-items (years, months, days, etc.).
         /// </summary>        
         public List<TimelineItemBaseUnit> Units { get; }

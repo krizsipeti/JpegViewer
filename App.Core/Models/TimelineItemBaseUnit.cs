@@ -1,4 +1,4 @@
-﻿using System.Collections.ObjectModel;
+﻿using System.Collections.Generic;
 using JpegViewer.App.Core.Types;
 
 namespace JpegViewer.App.Core.Models
@@ -23,7 +23,7 @@ namespace JpegViewer.App.Core.Models
         /// <summary>
         /// All the images belongs to this item based on their creation time or null of none.
         /// </summary>
-        public ObservableCollection<ImageInfo>? Images { get; set; }
+        public List<ImageInfo>? Images { get; set; }
 
         /// <summary>
         /// Create base unit with immutable value

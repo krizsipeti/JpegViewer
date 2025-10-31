@@ -85,6 +85,21 @@ namespace JpegViewer.App.UI.Controls
                         vmdCtrlTimeline.ItemsWidth = vmdCtrlTimeline.MinItemsWidth;
                         vmdCtrlTimeline.ZoomLevel = ETimelineZoomLevel.Days;
                     }
+                    else if (vmdCtrlTimeline.ZoomLevel == ETimelineZoomLevel.Days)
+                    {
+                        vmdCtrlTimeline.ItemsWidth = vmdCtrlTimeline.MinItemsWidth;
+                        vmdCtrlTimeline.ZoomLevel = ETimelineZoomLevel.Hours;
+                    }
+                    else if (vmdCtrlTimeline.ZoomLevel == ETimelineZoomLevel.Hours)
+                    {
+                        vmdCtrlTimeline.ItemsWidth = vmdCtrlTimeline.MinItemsWidth;
+                        vmdCtrlTimeline.ZoomLevel = ETimelineZoomLevel.Minutes;
+                    }
+                    else if (vmdCtrlTimeline.ZoomLevel == ETimelineZoomLevel.Minutes)
+                    {
+                        vmdCtrlTimeline.ItemsWidth = vmdCtrlTimeline.MinItemsWidth;
+                        vmdCtrlTimeline.ZoomLevel = ETimelineZoomLevel.Seconds;
+                    }
                 }
                 else if (vmdCtrlTimeline.ItemsWidth + change < vmdCtrlTimeline.MinItemsWidth)
                 {
@@ -97,6 +112,21 @@ namespace JpegViewer.App.UI.Controls
                     {
                         vmdCtrlTimeline.ItemsWidth = vmdCtrlTimeline.MaxItemsWidth;
                         vmdCtrlTimeline.ZoomLevel = ETimelineZoomLevel.Months;
+                    }
+                    else if (vmdCtrlTimeline.ZoomLevel == ETimelineZoomLevel.Hours)
+                    {
+                        vmdCtrlTimeline.ItemsWidth = vmdCtrlTimeline.MaxItemsWidth;
+                        vmdCtrlTimeline.ZoomLevel = ETimelineZoomLevel.Days;
+                    }
+                    else if (vmdCtrlTimeline.ZoomLevel == ETimelineZoomLevel.Minutes)
+                    {
+                        vmdCtrlTimeline.ItemsWidth = vmdCtrlTimeline.MaxItemsWidth;
+                        vmdCtrlTimeline.ZoomLevel = ETimelineZoomLevel.Hours;
+                    }
+                    else if (vmdCtrlTimeline.ZoomLevel == ETimelineZoomLevel.Seconds)
+                    {
+                        vmdCtrlTimeline.ItemsWidth = vmdCtrlTimeline.MaxItemsWidth;
+                        vmdCtrlTimeline.ZoomLevel = ETimelineZoomLevel.Minutes;
                     }
                 }
                 else
