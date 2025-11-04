@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using JpegViewer.App.Core.Interfaces;
 using JpegViewer.App.Core.Models;
 using JpegViewer.App.Core.Types;
+using static System.Net.Mime.MediaTypeNames;
 
 
 namespace JpegViewer.App.Vmd.Controls
@@ -144,22 +145,22 @@ namespace JpegViewer.App.Vmd.Controls
             switch (zoomLevel)
             {
                 case ETimelineZoomLevel.Years:
-                    itemsList = GetItemsForYearZoom(CurrentPosition.AddYears(-50), CurrentPosition.AddYears(50));
+                    itemsList = GetItemsForYearZoom(CurrentPosition.AddYears(-30), CurrentPosition.AddYears(30));
                     break;
                 case ETimelineZoomLevel.Months:
-                    itemsList = GetItemsForMonthZoom(CurrentPosition.AddYears(-5), CurrentPosition.AddYears(5));
+                    itemsList = GetItemsForMonthZoom(CurrentPosition.AddYears(-3), CurrentPosition.AddYears(3));
                     break;
                 case ETimelineZoomLevel.Days:
-                    itemsList = GetItemsForDayZoom(CurrentPosition.AddMonths(-5), CurrentPosition.AddMonths(5));
+                    itemsList = GetItemsForDayZoom(CurrentPosition.AddMonths(-3), CurrentPosition.AddMonths(3));
                     break;
                 case ETimelineZoomLevel.Hours:
-                    itemsList = GetItemsForHourZoom(CurrentPosition.AddDays(-5), CurrentPosition.AddDays(5));
+                    itemsList = GetItemsForHourZoom(CurrentPosition.AddDays(-3), CurrentPosition.AddDays(3));
                     break;
                 case ETimelineZoomLevel.Minutes:
-                    itemsList = GetItemsForMinuteZoom(CurrentPosition.AddHours(-5), CurrentPosition.AddHours(5));
+                    itemsList = GetItemsForMinuteZoom(CurrentPosition.AddHours(-3), CurrentPosition.AddHours(3));
                     break;
                 case ETimelineZoomLevel.Seconds:
-                    itemsList = GetItemsForSecondZoom(CurrentPosition.AddMinutes(-5), CurrentPosition.AddMinutes(5));
+                    itemsList = GetItemsForSecondZoom(CurrentPosition.AddMinutes(-3), CurrentPosition.AddMinutes(3));
                     break;
             }
 
@@ -200,7 +201,7 @@ namespace JpegViewer.App.Vmd.Controls
                 return;
             }
             
-            var itemsList = GetItemsForYearZoom(new DateTime(e.DateTaken.Year - 50, 1, 1), new DateTime(e.DateTaken.Year + 50, 1, 1));
+            var itemsList = GetItemsForYearZoom(new DateTime(e.DateTaken.Year - 20, 1, 1), new DateTime(e.DateTaken.Year + 20, 1, 1));
             DispatcherService.Invoke(new Action(() =>
             {
                 Items.Clear();
@@ -246,21 +247,23 @@ namespace JpegViewer.App.Vmd.Controls
         /// </summary>
         private List<TimelineItem> GetItemsForMonthZoom(DateTime start, DateTime end)
         {
+            // Check for wrong parameters
+            if (start > end)
+            {
+                return new List<TimelineItem>();
+            }
+
             // First group images by year and month
-            var imagesByYearMonth = ImageService.GetImagesForDateRange(start, end).GroupBy(i => i.DateTaken.Year)
+            var imagesByYM = ImageService.GetImagesForDateRange(start, end).GroupBy(i => i.DateTaken.Year)
                 .ToDictionary(yg => yg.Key, yg => yg.GroupBy(i => i.DateTaken.Month)
                 .ToDictionary(mg => mg.Key, mg => new List<ImageInfo>(mg)));
 
-            // Determine the min and max year
-            int minYear = start.Year;
-            int maxYear = end.Year;
-
-            // Allocate list with the calculated number of years and create the TimelineItems
-            var result = new List<TimelineItem>(maxYear - minYear + 1);
-            for (int year = minYear; year <= maxYear; year++)
+            // Allocate list and create the timeline items
+            var result = new List<TimelineItem>(end.Year - start.Year + 1);
+            for (DateTime s = start; s <= end; s = s.AddYears(1))
             {
                 // Try to get the current year with the month groups
-                imagesByYearMonth.TryGetValue(year, out var monthsDict);
+                imagesByYM.TryGetValue(s.Year, out var monthsDict);
 
                 // Allocate list for every month base units
                 var baseUnits = new List<TimelineItemBaseUnit>(12);
@@ -270,9 +273,8 @@ namespace JpegViewer.App.Vmd.Controls
                     monthsDict?.TryGetValue(month, out images);
                     baseUnits.Add(new TimelineItemBaseUnit(ETimelineBaseUnitType.Month, month) { Images = images });
                 }
-                result.Add(new TimelineItem(new DateTime(year, 1, 1), ETimelineItemType.MonthsOfYear, baseUnits));
+                result.Add(new TimelineItem(new DateTime(s.Year, 1, 1), ETimelineItemType.MonthsOfYear, baseUnits));
             }
-
             return result;
         }
 
@@ -281,42 +283,40 @@ namespace JpegViewer.App.Vmd.Controls
         /// </summary>
         private List<TimelineItem> GetItemsForDayZoom(DateTime start, DateTime end)
         {
+            // Check for wrong parameters
+            if (start > end)
+            {
+                return new List<TimelineItem>();
+            }
+
             // First group images by year, month and day
-            var imagesByYearMonthDay = ImageService.GetImagesForDateRange(start, end).GroupBy(i => i.DateTaken.Year)
+            var imagesByYMD = ImageService.GetImagesForDateRange(start, end).GroupBy(i => i.DateTaken.Year)
                 .ToDictionary(yg => yg.Key, yg => yg.GroupBy(i => i.DateTaken.Month)
                 .ToDictionary(mg => mg.Key, mg => mg.GroupBy(i => i.DateTaken.Day)
                 .ToDictionary(dg => dg.Key, dg => new List<ImageInfo>(dg))));
 
-            // Determine the min and max year
-            int minYear = start.Year;
-            int maxYear = end.Year;
-
-            // Allocate list with the calculated number of months and create the timeline items
-            var result = new List<TimelineItem>((maxYear - minYear + 1) * 12);
-            for (int year = minYear; year <= maxYear; year++)
+            // Allocate list and create the timeline items
+            var result = new List<TimelineItem>();
+            for (DateTime s = start; s <= end; s = s.AddMonths(1))
             {
                 // Try to get the current year with the month groups
-                imagesByYearMonthDay.TryGetValue(year, out var monthsDict);
+                imagesByYMD.TryGetValue(s.Year, out var monthsDict);
 
-                for (int month = 1; month <= 12; month++)
+                // Try to get current month with the days group
+                Dictionary<int, List<ImageInfo>>? daysDict = null;
+                monthsDict?.TryGetValue(s.Month, out daysDict);
+
+                // Allocate list for every day base units
+                int daysInMonth = DateTime.DaysInMonth(s.Year, s.Month);
+                var baseUnits = new List<TimelineItemBaseUnit>(daysInMonth);
+                for (int day = 1; day <= daysInMonth; day++)
                 {
-                    // Try to get current month with the days group
-                    Dictionary<int, List<ImageInfo>>? daysDict = null;
-                    monthsDict?.TryGetValue(month, out daysDict);
-
-                    // Allocate list for every day base units
-                    int daysInMonth = DateTime.DaysInMonth(year, month);
-                    var baseUnits = new List<TimelineItemBaseUnit>(daysInMonth);
-                    for (int day = 1; day <= daysInMonth; day++)
-                    {
-                        List<ImageInfo>? images = null;
-                        daysDict?.TryGetValue(day, out images);
-                        baseUnits.Add(new TimelineItemBaseUnit(ETimelineBaseUnitType.Day, day) { Images = images });
-                    }
-                    result.Add(new TimelineItem(new DateTime(year, month, 1), ETimelineItemType.DaysOfMonth, baseUnits));
+                    List<ImageInfo>? images = null;
+                    daysDict?.TryGetValue(day, out images);
+                    baseUnits.Add(new TimelineItemBaseUnit(ETimelineBaseUnitType.Day, day) { Images = images });
                 }
+                result.Add(new TimelineItem(new DateTime(s.Year, s.Month, 1), ETimelineItemType.DaysOfMonth, baseUnits));
             }
-
             return result;
         }
 
@@ -325,50 +325,44 @@ namespace JpegViewer.App.Vmd.Controls
         /// </summary>
         private List<TimelineItem> GetItemsForHourZoom(DateTime start, DateTime end)
         {
+            // Check for wrong parameters
+            if (start > end)
+            {
+                return new List<TimelineItem>();
+            }
+
             // First group images by year, month, day and hour
-            var imagesByYearMonthDayHour = ImageService.GetImagesForDateRange(start, end).GroupBy(i => i.DateTaken.Year)
+            var imagesByYMDH = ImageService.GetImagesForDateRange(start, end).GroupBy(i => i.DateTaken.Year)
                 .ToDictionary(yg => yg.Key, yg => yg.GroupBy(i => i.DateTaken.Month)
                 .ToDictionary(mg => mg.Key, mg => mg.GroupBy(i => i.DateTaken.Day)
                 .ToDictionary(dg => dg.Key, dg => dg.GroupBy(i => i.DateTaken.Hour)
                 .ToDictionary(hg => hg.Key, hg => new List<ImageInfo>(hg)))));
 
-            // Determine the min and max year
-            int minYear = start.Year;
-            int maxYear = end.Year;
-
-            // Allocate list with the calculated number of months and create the timeline items
-            var result = new List<TimelineItem>((maxYear - minYear + 1) * 12);
-            for (int year = minYear; year <= maxYear; year++)
+            // Allocate list with the calculated number of days and create the timeline items
+            var result = new List<TimelineItem>(((int)(end - start).TotalDays) + 1);
+            for (DateTime s = start; s <= end; s = s.AddDays(1))
             {
                 // Try to get the current year with the month groups
-                imagesByYearMonthDayHour.TryGetValue(year, out var monthsDict);
+                imagesByYMDH.TryGetValue(s.Year, out var monthsDict);
 
-                for (int month = 1; month <= 12; month++)
+                // Try to get current month with the days group
+                Dictionary<int, Dictionary<int, List<ImageInfo>>>? daysDict = null;
+                monthsDict?.TryGetValue(s.Month, out daysDict);
+
+                // Try to get current day with the hours group
+                Dictionary<int, List<ImageInfo>>? hoursDict = null;
+                daysDict?.TryGetValue(s.Day, out hoursDict);
+
+                // Allocate list for hour base units
+                var baseUnits = new List<TimelineItemBaseUnit>(24);
+                for (int hour = 0; hour < 24; hour++)
                 {
-                    // Try to get current month with the days group
-                    Dictionary<int, Dictionary<int, List<ImageInfo>>>? daysDict = null;
-                    monthsDict?.TryGetValue(month, out daysDict);
-
-                    int daysInMonth = DateTime.DaysInMonth(year, month);
-                    for (int day = 1; day <= daysInMonth; day++)
-                    {
-                        // Try to get current day with the hours group
-                        Dictionary<int, List<ImageInfo>>? hoursDict = null;
-                        daysDict?.TryGetValue(day, out hoursDict);
-
-                        // Allocate list for hour base units
-                        var baseUnits = new List<TimelineItemBaseUnit>(24);
-                        for (int hour = 0; hour < 24; hour++)
-                        {
-                            List<ImageInfo>? images = null;
-                            hoursDict?.TryGetValue(hour, out images);
-                            baseUnits.Add(new TimelineItemBaseUnit(ETimelineBaseUnitType.Hour, hour) { Images = images });
-                        }
-                        result.Add(new TimelineItem(new DateTime(year, month, day), ETimelineItemType.HoursOfDay, baseUnits));
-                    }
+                    List<ImageInfo>? images = null;
+                    hoursDict?.TryGetValue(hour, out images);
+                    baseUnits.Add(new TimelineItemBaseUnit(ETimelineBaseUnitType.Hour, hour) { Images = images });
                 }
+                result.Add(new TimelineItem(new DateTime(s.Year, s.Month, s.Day), ETimelineItemType.HoursOfDay, baseUnits));
             }
-
             return result;
         }
 
@@ -377,58 +371,49 @@ namespace JpegViewer.App.Vmd.Controls
         /// </summary>
         private List<TimelineItem> GetItemsForMinuteZoom(DateTime start, DateTime end)
         {
+            // Check for wrong parameters
+            if (start > end)
+            {
+                return new List<TimelineItem>();
+            }
+
             // First group images by year, month, day and hour
-            var imagesByYearMonthDayHour = ImageService.GetImagesForDateRange(start, end).GroupBy(i => i.DateTaken.Year)
+            var imagesByYMDHM = ImageService.GetImagesForDateRange(start, end).GroupBy(i => i.DateTaken.Year)
                 .ToDictionary(yg => yg.Key, yg => yg.GroupBy(i => i.DateTaken.Month)
                 .ToDictionary(mg => mg.Key, mg => mg.GroupBy(i => i.DateTaken.Day)
                 .ToDictionary(dg => dg.Key, dg => dg.GroupBy(i => i.DateTaken.Hour)
                 .ToDictionary(dg => dg.Key, dg => dg.GroupBy(i => i.DateTaken.Minute)
                 .ToDictionary(hg => hg.Key, hg => new List<ImageInfo>(hg))))));
 
-            // Determine the min and max year
-            int minYear = start.Year;
-            int maxYear = end.Year;
-
-            // Allocate list with the calculated number of months and create the timeline items
-            var result = new List<TimelineItem>((maxYear - minYear + 1) * 12);
-            for (int year = minYear; year <= maxYear; year++)
+            // Allocate list with the calculated number of hours and create the timeline items
+            var result = new List<TimelineItem>(((int)(end - start).TotalHours) + 1);
+            for (DateTime s = start; s <= end; s = s.AddHours(1))
             {
                 // Try to get the current year with the month groups
-                imagesByYearMonthDayHour.TryGetValue(year, out var monthsDict);
+                imagesByYMDHM.TryGetValue(s.Year, out var monthsDict);
 
-                for (int month = 1; month <= 12; month++)
+                // Try to get current month with the days group
+                Dictionary<int, Dictionary<int, Dictionary<int, List<ImageInfo>>>>? daysDict = null;
+                monthsDict?.TryGetValue(s.Month, out daysDict);
+
+                // Try to get current day with the hours group
+                Dictionary<int, Dictionary<int, List<ImageInfo>>>? hoursDict = null;
+                daysDict?.TryGetValue(s.Day, out hoursDict);
+
+                // Try to get current hour with the minutes group
+                Dictionary<int, List<ImageInfo>>? minutesDict = null;
+                hoursDict?.TryGetValue(s.Hour, out minutesDict);
+
+                // Allocate list for minute base units
+                var baseUnits = new List<TimelineItemBaseUnit>(60);
+                for (int minute = 0; minute < 60; minute++)
                 {
-                    // Try to get current month with the days group
-                    Dictionary<int, Dictionary<int, Dictionary<int, List<ImageInfo>>>>? daysDict = null;
-                    monthsDict?.TryGetValue(month, out daysDict);
-
-                    int daysInMonth = DateTime.DaysInMonth(year, month);
-                    for (int day = 1; day <= daysInMonth; day++)
-                    {
-                        // Try to get current day with the hours group
-                        Dictionary<int, Dictionary<int, List<ImageInfo>>>? hoursDict = null;
-                        daysDict?.TryGetValue(day, out hoursDict);
-
-                        for (int hour = 0; hour < 24; hour++)
-                        {
-                            // Try to get current hour with the minutes group
-                            Dictionary<int, List<ImageInfo>>? minutesDict = null;
-                            hoursDict?.TryGetValue(hour, out minutesDict);
-
-                            // Allocate list for minute base units
-                            var baseUnits = new List<TimelineItemBaseUnit>(60);
-                            for (int minute = 0; minute < 60; minute++)
-                            {
-                                List<ImageInfo>? images = null;
-                                minutesDict?.TryGetValue(minute, out images);
-                                baseUnits.Add(new TimelineItemBaseUnit(ETimelineBaseUnitType.Minute, minute) { Images = images });
-                            }
-                            result.Add(new TimelineItem(new DateTime(year, month, day, hour, 0, 0), ETimelineItemType.MinutesOfHour, baseUnits));
-                        }
-                    }
+                    List<ImageInfo>? images = null;
+                    minutesDict?.TryGetValue(minute, out images);
+                    baseUnits.Add(new TimelineItemBaseUnit(ETimelineBaseUnitType.Minute, minute) { Images = images });
                 }
+                result.Add(new TimelineItem(new DateTime(s.Year, s.Month, s.Day, s.Hour, 0, 0), ETimelineItemType.MinutesOfHour, baseUnits));
             }
-
             return result;
         }
 
@@ -437,8 +422,14 @@ namespace JpegViewer.App.Vmd.Controls
         /// </summary>
         private List<TimelineItem> GetItemsForSecondZoom(DateTime start, DateTime end)
         {
+            // Check for wrong parameters
+            if (start > end)
+            {
+                return new List<TimelineItem>();
+            }
+
             // First group images by year, month, day and hour
-            var imagesByYearMonthDayHour = ImageService.GetImagesForDateRange(start, end).GroupBy(i => i.DateTaken.Year)
+            var imagesByYMDHMS = ImageService.GetImagesForDateRange(start, end).GroupBy(i => i.DateTaken.Year)
                 .ToDictionary(yg => yg.Key, yg => yg.GroupBy(i => i.DateTaken.Month)
                 .ToDictionary(mg => mg.Key, mg => mg.GroupBy(i => i.DateTaken.Day)
                 .ToDictionary(dg => dg.Key, dg => dg.GroupBy(i => i.DateTaken.Hour)
@@ -446,57 +437,39 @@ namespace JpegViewer.App.Vmd.Controls
                 .ToDictionary(dg => dg.Key, dg => dg.GroupBy(i => i.DateTaken.Second)
                 .ToDictionary(hg => hg.Key, hg => new List<ImageInfo>(hg)))))));
 
-            // Determine the min and max year
-            int minYear = start.Year;
-            int maxYear = end.Year;
-
-            // Allocate list with the calculated number of months and create the timeline items
-            var result = new List<TimelineItem>((maxYear - minYear + 1) * 12);
-            for (int year = minYear; year <= maxYear; year++)
+            // Allocate list with the calculated number of minutes and create the timeline items
+            var result = new List<TimelineItem>(((int)(end - start).TotalMinutes) + 1);
+            for (DateTime s = start; s <= end; s = s.AddMinutes(1))
             {
                 // Try to get the current year with the month groups
-                imagesByYearMonthDayHour.TryGetValue(year, out var monthsDict);
+                imagesByYMDHMS.TryGetValue(s.Year, out var monthsDict);
 
-                for (int month = 1; month <= 12; month++)
+                // Try to get current month with the days group
+                Dictionary<int, Dictionary<int, Dictionary<int, Dictionary<int, List<ImageInfo>>>>>? daysDict = null;
+                monthsDict?.TryGetValue(s.Month, out daysDict);
+
+                // Try to get current day with the hours group
+                Dictionary<int, Dictionary<int, Dictionary<int, List<ImageInfo>>>>? hoursDict = null;
+                daysDict?.TryGetValue(s.Day, out hoursDict);
+
+                // Try to get current hour with the minutes group
+                Dictionary<int, Dictionary<int, List<ImageInfo>>>? minutesDict = null;
+                hoursDict?.TryGetValue(s.Hour, out minutesDict);
+
+                // Try to get current minute with the seconds group
+                Dictionary<int, List<ImageInfo>>? secondsDict = null;
+                minutesDict?.TryGetValue(s.Minute, out secondsDict);
+
+                // Allocate list for seconds base units
+                var baseUnits = new List<TimelineItemBaseUnit>(60);
+                for (int second = 0; second < 60; second++)
                 {
-                    // Try to get current month with the days group
-                    Dictionary<int, Dictionary<int, Dictionary<int, Dictionary<int, List<ImageInfo>>>>>? daysDict = null;
-                    monthsDict?.TryGetValue(month, out daysDict);
-
-                    int daysInMonth = DateTime.DaysInMonth(year, month);
-                    for (int day = 1; day <= daysInMonth; day++)
-                    {
-                        // Try to get current day with the hours group
-                        Dictionary<int, Dictionary<int, Dictionary<int, List<ImageInfo>>>>? hoursDict = null;
-                        daysDict?.TryGetValue(day, out hoursDict);
-
-                        for (int hour = 0; hour < 24; hour++)
-                        {
-                            // Try to get current hour with the minutes group
-                            Dictionary<int, Dictionary<int, List<ImageInfo>>>? minutesDict = null;
-                            hoursDict?.TryGetValue(hour, out minutesDict);
-
-                            for (int minute = 0; minute < 60; minute++)
-                            {
-                                // Try to get current minute with the seconds group
-                                Dictionary<int, List<ImageInfo>>? secondsDict = null;
-                                minutesDict?.TryGetValue(minute, out secondsDict);
-
-                                // Allocate list for minute base units
-                                var baseUnits = new List<TimelineItemBaseUnit>(60);
-                                for (int second = 0; second < 60; second++)
-                                {
-                                    List<ImageInfo>? images = null;
-                                    secondsDict?.TryGetValue(second, out images);
-                                    baseUnits.Add(new TimelineItemBaseUnit(ETimelineBaseUnitType.Second, second) { Images = images });
-                                }
-                                result.Add(new TimelineItem(new DateTime(year, month, day, hour, minute, 0), ETimelineItemType.SecondsOfMinute, baseUnits));
-                            }
-                        }
-                    }
+                    List<ImageInfo>? images = null;
+                    secondsDict?.TryGetValue(second, out images);
+                    baseUnits.Add(new TimelineItemBaseUnit(ETimelineBaseUnitType.Second, second) { Images = images });
                 }
+                result.Add(new TimelineItem(new DateTime(s.Year, s.Month, s.Day, s.Hour, s.Minute, 0), ETimelineItemType.SecondsOfMinute, baseUnits));
             }
-
             return result;
         }
     }
