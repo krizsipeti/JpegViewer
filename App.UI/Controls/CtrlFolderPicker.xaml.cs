@@ -1,13 +1,7 @@
-using System;
-using System.Collections;
+using JpegViewer.App.UI.Support;
 using JpegViewer.App.Vmd.Controls;
-using Microsoft.UI;
-using Microsoft.UI.Composition;
-using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
-using Microsoft.UI.Xaml.Hosting;
 using Microsoft.UI.Xaml.Input;
-using Microsoft.UI.Xaml.Media.Animation;
 
 namespace JpegViewer.App.UI.Controls
 {
@@ -19,43 +13,11 @@ namespace JpegViewer.App.UI.Controls
         #region Fields and private properties
 
         /// <summary>
-        /// Holds the spring animation used for scaling folder items on hover.
+        /// Holds an animation helper class used for control buttons.
         /// </summary>
-        private SpringVector3NaturalMotionAnimation SpringAnimation { get; }
-
-        /// <summary>
-        /// Holds the storyboard for folder hover color animation.
-        /// </summary>
-        private Storyboard Storyboard { get; }
-
-        /// <summary>
-        /// Holds the color animation for folder hover effect.
-        /// </summary>
-        private ColorAnimation FolderHoverColorAnimation { get; }
+        private AnimationHelper Animation { get; } = new AnimationHelper();
 
         #endregion Fields and private properties
-
-        #region Dependency Property registrations
-
-        /// <summary>
-        /// Dependency property for the list of folders to be displayed in the folder picker.
-        /// </summary>
-        public static readonly DependencyProperty FolderListProperty = DependencyProperty.Register(nameof(Folders), typeof(IEnumerable), typeof(CtrlFolderPicker), null);
-
-        #endregion Dependency Property registrations
-
-        #region Public properties
-
-        /// <summary>
-        /// Holds the list of folders to be displayed in the folder picker.
-        /// </summary>
-        public IEnumerable Folders
-        {
-            get => (IEnumerable)GetValue(FolderListProperty);
-            set => SetValue(FolderListProperty, value);
-        }
-
-        #endregion Public properties
 
         /// <summary>
         /// Initializes a new instance of the <see cref="CtrlFolderPicker"/> class.
@@ -66,16 +28,6 @@ namespace JpegViewer.App.UI.Controls
 
             // Set the root element's DataContext to the viewmodel of the FolderPicker control
             root.DataContext = App.GetService<VmdCtrlFolderPicker>();
-
-            // Folder hover scale spring animation setup
-            SpringAnimation = ElementCompositionPreview.GetElementVisual(root).Compositor.CreateSpringVector3Animation();
-            SpringAnimation.DampingRatio = 0.2f;
-            SpringAnimation.Target = "Scale";
-
-            // Folder hover color animation setup
-            Storyboard = new Storyboard() { AutoReverse = true, RepeatBehavior = RepeatBehavior.Forever };
-            FolderHoverColorAnimation = new ColorAnimation() { To = Colors.Red, Duration = new Duration(TimeSpan.FromMilliseconds(450)) };
-            Storyboard.Children.Add(FolderHoverColorAnimation);
         }
 
         /// <summary>
@@ -83,15 +35,8 @@ namespace JpegViewer.App.UI.Controls
         /// </summary>
         private void TreeViewItem_PointerEntered(object sender, PointerRoutedEventArgs e)
         {
-            // Do Scale animation
-            SpringAnimation.FinalValue = new System.Numerics.Vector3(1.05f);
-            (sender as UIElement)!.StartAnimation(SpringAnimation);
-
-            // Do Color animation
-            Storyboard.Stop();
-            Storyboard.SetTarget(FolderHoverColorAnimation, ((sender as TreeViewItem)!.Content as Grid)!.Children[1]);
-            Storyboard.SetTargetProperty(FolderHoverColorAnimation, "(TextBlock.Foreground).(SolidColorBrush.Color)");
-            Storyboard.Begin();
+            Animation.DoAnimationPointerEntered(sender, ((sender as TreeViewItem)!.Content as Grid)!.Children[1], typeof(TextBlock));
+            e.Handled = true;
         }
 
         /// <summary>
@@ -99,12 +44,44 @@ namespace JpegViewer.App.UI.Controls
         /// </summary>
         private void TreeViewItem_PointerExited(object sender, PointerRoutedEventArgs e)
         {
-            // Stop Color animation
-            Storyboard.Stop();
+            Animation.DoAnimationPointerExited(sender);
+            e.Handled = true;
+        }
 
-            // Do Scale animation back to normal
-            SpringAnimation.FinalValue = new System.Numerics.Vector3(1.0f);
-            (sender as UIElement)!.StartAnimation(SpringAnimation);
+        /// <summary>
+        /// Called when the pointer enters a button, triggering a spring animation to scale up.
+        /// </summary>
+        private void FontIcon_PointerEntered(object sender, PointerRoutedEventArgs e)
+        {
+            Animation.DoAnimationPointerEntered(sender, typeof(FontIcon));
+            e.Handled = true;
+        }
+
+        /// <summary>
+        ///  Called when the pointer exits a button, triggering a spring animation to scale down.
+        /// </summary>
+        private void FontIcon_PointerExited(object sender, PointerRoutedEventArgs e)
+        {
+            Animation.DoAnimationPointerExited(sender);
+            e.Handled = true;
+        }
+
+        /// <summary>
+        /// Scale animation of button pressed state.
+        /// </summary>
+        private void FontIcon_PointerPressed(object sender, PointerRoutedEventArgs e)
+        {
+            Animation.DoAnimationPointerPressed(sender);
+            e.Handled = true;
+        }
+
+        /// <summary>
+        /// Scale animation of button released state.
+        /// </summary>
+        private void FontIcon_PointerReleased(object sender, PointerRoutedEventArgs e)
+        {
+            Animation.DoAnimationPointerReleased(sender);
+            e.Handled = true;
         }
     }
 }

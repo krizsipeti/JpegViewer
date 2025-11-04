@@ -1,9 +1,14 @@
 using System;
+using System.Collections.ObjectModel;
+using CommunityToolkit.Mvvm.Messaging;
+using JpegViewer.App.Core.Models;
 using JpegViewer.App.Core.Types;
+using JpegViewer.App.UI.Support;
 using JpegViewer.App.Vmd.Controls;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Input;
+using Windows.Foundation;
 using Windows.System;
 
 namespace JpegViewer.App.UI.Controls
@@ -11,8 +16,13 @@ namespace JpegViewer.App.UI.Controls
     /// <summary>
     /// Represents a user control for displaying and interacting with a timeline.
     /// </summary>
-    public sealed partial class CtrlTimeline : UserControl
+    public sealed partial class CtrlTimeline : UserControl, IRecipient<TimelineCurrentPositionChange>
     {
+        /// <summary>
+        /// Holds an animation helper class used for control buttons.
+        /// </summary>
+        private AnimationHelper Animation { get; } = new AnimationHelper();
+
         /// <summary>
         /// True if dragging is in action, false otherwise.
         /// </summary>
@@ -29,16 +39,6 @@ namespace JpegViewer.App.UI.Controls
         private double StartPointerX { get; set; }
 
         /// <summary>
-        /// The last X coordinate during dragging action.
-        /// </summary>
-        private double LastPointerX { get; set; }
-
-        /// <summary>
-        /// Speed of scrolling in pixels per millisecond.
-        /// </summary>
-        private double Velocity { get; set; }
-
-        /// <summary>
         /// Holds a previous time point where dragging happened.
         /// </summary>
         private DateTime LastTime { get; set; }
@@ -52,6 +52,9 @@ namespace JpegViewer.App.UI.Controls
 
             // Set the DataContext to the viewmodel of the Timeline control
             DataContext = App.GetService<VmdCtrlTimeline>();
+
+            // Register this instance to receive messages
+            WeakReferenceMessenger.Default.Register<TimelineCurrentPositionChange>(this);
         }
 
         /// <summary>
@@ -156,9 +159,7 @@ namespace JpegViewer.App.UI.Controls
                 IsDragging = true;
                 StartPointerX = pt.Position.X;
                 StartOffset = scrollViewer.HorizontalOffset;
-                LastPointerX = StartPointerX;
                 LastTime = DateTime.UtcNow;
-                Velocity = 0;
 
                 UIElement? uiSender = sender as UIElement;
                 if (uiSender != null)
@@ -183,15 +184,10 @@ namespace JpegViewer.App.UI.Controls
             var currentX = pt.Position.X;
             var now = DateTime.UtcNow;
             var dt = (now - LastTime).TotalMilliseconds;
-            if (dt > 0)
-            {
-                Velocity = (currentX - LastPointerX) / dt; // px per ms
-            }
 
             var delta = StartPointerX - currentX; // move opposite to pointer
             var newOffset = StartOffset + delta;
             scrollViewer.ChangeView(newOffset, null, null, true);
-            LastPointerX = currentX;
             LastTime = now;
             e.Handled = true;
         }
@@ -232,34 +228,141 @@ namespace JpegViewer.App.UI.Controls
                 uiSender.ReleasePointerCaptures();
             }
 
-            // Apply simple inertia: continue scrolling based on velocity, decelerate
-            const double deceleration = 0.0025; // px/ms^2
-            double v = Velocity; // px/ms
-            if (Math.Abs(v) < 0.01)
+            e.Handled = true;
+        }
+
+        /// <summary>
+        /// Received from view model. Requests the new position in the scrollview.
+        /// </summary>
+        /// <param name="message"></param>
+        /// <exception cref="NotImplementedException"></exception>
+        public void Receive(TimelineCurrentPositionChange message)
+        {
+            //VmdCtrlTimeline? vmd = DataContext as VmdCtrlTimeline;
+            //if (vmd == null)
+            //{
+            //    return;
+            //}
+
+            //var offset = (message.NewPosition - vmd.StartPosition).TotalMicroseconds / vmd.CurrentLenght.TotalMicroseconds * scrollViewer.ExtentWidth;
+            //scrollViewer.ChangeView(1000d/*offset*/, null, null, false);
+        }
+
+        /// <summary>
+        /// Calculates the current position based on the scrollviewer state.
+        /// Current position is the center of the scrollviewer.
+        /// </summary>
+        private void SetCurrentPosition()
+        {
+            VmdCtrlTimeline? vmd = DataContext as VmdCtrlTimeline;
+            if (vmd == null)
             {
                 return;
             }
 
-            // compute target offset with simple exponential decay/integration
-            // s = v^2 / (2*a)
-            double sign = Math.Sign(v);
-            double stoppingDistance = (v * v) / (2 * deceleration);
-            double target = scrollViewer.HorizontalOffset - sign * stoppingDistance;
+            // Transform our ScrollViewers visible center point to ItemsRepeater center point
+            var center = new Point(scrollViewer.ViewportWidth / 2, scrollViewer.ViewportHeight / 2);
+            var pt = scrollViewer.TransformToVisual(itemsRepeater).TransformPoint(center);
 
-            // clamp target within scrollable range
-            var maxOffset = scrollViewer.ExtentWidth - scrollViewer.ViewportWidth;
-            if (target < 0)
+            // Get the ItemsRepeater collection
+            var items = itemsRepeater.ItemsSource as ObservableCollection<TimelineItem>;
+            if (items == null)
             {
-                target = 0;
+                return;
             }
 
-            if (target > maxOffset)
+            // Enumerate realized elements in ItemsRepeater by TryGetElement using indexes
+            for (int i = 0; i < items?.Count; i++)
             {
-                target = maxOffset;
-            }
+                var element = itemsRepeater.TryGetElement(i);
+                if (element == null) continue;
 
-            // use ChangeView with animation (true). The duration isn't directly controllable here.
-            scrollViewer.ChangeView(target, null, null, true);
+                // Get element bounds in repeater coordinates
+                var transform = element.TransformToVisual(itemsRepeater);
+                var topLeft = transform.TransformPoint(new Point(0, 0));
+                var size = (element as FrameworkElement)?.RenderSize ?? new Size(0, 0);
+                var rect = new Rect(topLeft, size);
+
+                // Hitest the center point to the element rect
+                if (rect.Contains(pt))
+                {
+                    Grid? grid = (element as Grid);
+                    TimelineItem? item = items?[i];
+                    if (item != null && grid != null)
+                    {
+                        double microsPerPixel = item.Duration.TotalMicroseconds / grid.ActualWidth;
+                        double currentOffset = pt.X - grid.ActualOffset.X;
+                        vmd.CurrentPosition = item.ItemKey.AddMicroseconds(microsPerPixel * currentOffset);
+                    }
+                }
+            }
+        }
+
+        /// <summary>
+        /// Called on ViewChanged events of the scrollview.
+        /// We calculate here the current time and set for our view model.
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void scrollViewer_ViewChanged(object sender, ScrollViewerViewChangedEventArgs e)
+        {
+            if (!e.IsIntermediate)
+            {
+                SetCurrentPosition();
+            }
+        }
+
+        /// <summary>
+        /// Called on LayoutUpdated events of the scrollview.
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void scrollViewer_LayoutUpdated(object sender, object e)
+        {
+            SetCurrentPosition();
+        }
+
+        /// <summary>
+        /// Called when the pointer enters a FontIcon, triggering a spring animation.
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void FontIcon_PointerEntered(object sender, PointerRoutedEventArgs e)
+        {
+            Animation.DoAnimationPointerEntered(sender, typeof(FontIcon));
+            e.Handled = true;
+        }
+
+        /// <summary>
+        /// Called when the pointer exits a FontIcon, triggering a spring animation.
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void FontIcon_PointerExited(object sender, PointerRoutedEventArgs e)
+        {
+            Animation.DoAnimationPointerExited(sender);
+            e.Handled = true;
+        }
+
+        /// <summary>
+        /// Called when the pointer is pressed on a FontIcon, triggering a spring animation.
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void FontIcon_PointerPressed(object sender, PointerRoutedEventArgs e)
+        {
+            Animation.DoAnimationPointerPressed(sender);
+            e.Handled = true;
+        }
+
+        /// <summary>
+        /// Called when the pointer is released on a FontIcon, triggering a spring animation.
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void FontIcon_PointerReleased(object sender, PointerRoutedEventArgs e)
+        {
+            Animation.DoAnimationPointerReleased(sender);
             e.Handled = true;
         }
     }

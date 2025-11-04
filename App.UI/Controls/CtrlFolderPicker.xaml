@@ -8,7 +8,8 @@
     xmlns:i="using:Microsoft.Xaml.Interactivity"
     xmlns:ct="using:JpegViewer.App.Core.Types"
     xmlns:support="using:JpegViewer.App.UI.Support"
-    mc:Ignorable="d">
+    mc:Ignorable="d"
+    x:Name="FolderPicker">
 
     <UserControl.Resources>
         <SolidColorBrush x:Key="TreeViewItemSelectionIndicatorForeground" Color="Red"/>
@@ -49,19 +50,54 @@
         </DataTemplate>
     </UserControl.Resources>
 
-    <Grid x:Name="root" Background="#2C2E2F">
+    <Grid x:Name="root" Background="#2C2E2F" MinWidth="250" MaxWidth="500">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
-        
-        <TextBlock Text="Select a folder" FontSize="32" HorizontalAlignment="Left"/>
+
+        <TextBlock Margin="16 2 0 8" Text="Select a folder:" FontSize="16" HorizontalAlignment="Left"/>
+        <Border Grid.Row="1" VerticalAlignment="Top"/>
         <TreeView Grid.Row="1"
                   ItemsSource="{Binding Folders}"
                   ItemTemplate="{StaticResource FolderPickerItemTemplate}"
+                  SelectedItem="{Binding SelectedItem, Mode=TwoWay}"
                   CanDragItems="False"
                   CanDrag="False"
                   AllowDrop="False"/>
+        <StackPanel Grid.Row="2" Margin="0 16 16 16" Orientation="Horizontal" HorizontalAlignment="Right">
+            <FontIcon Glyph="&#xf78c;"
+                      FontSize="24"
+                      FontWeight="Bold"
+                      PointerEntered="FontIcon_PointerEntered"
+                      PointerExited="FontIcon_PointerExited"
+                      PointerPressed="FontIcon_PointerPressed"
+                      PointerReleased="FontIcon_PointerReleased">
+                <i:Interaction.Behaviors>
+                    <i:EventTriggerBehavior EventName="PointerReleased">
+                        <i:InvokeCommandAction Command="{Binding OkPressedCommand}"/>
+                        <i:ChangePropertyAction TargetObject="{Binding ElementName=FolderPicker, Path=DataContext}" PropertyName="CurrentFolder" Value="{Binding SelectedItem.FullPath}"/>
+                        <i:ChangePropertyAction TargetObject="{Binding ElementName=FolderPicker, Path=DataContext}" PropertyName="IsFolderPickerVisible" Value="False"/>
+                    </i:EventTriggerBehavior>
+                </i:Interaction.Behaviors>
+            </FontIcon>
+            <FontIcon Margin="16 0 0 0"
+                      Glyph="&#xf78a;"
+                      FontSize="18"
+                      FontWeight="Bold"
+                      PointerEntered="FontIcon_PointerEntered"
+                      PointerExited="FontIcon_PointerExited"
+                      PointerPressed="FontIcon_PointerPressed"
+                      PointerReleased="FontIcon_PointerReleased">
+                <i:Interaction.Behaviors>
+                    <i:EventTriggerBehavior EventName="PointerReleased">
+                        <i:InvokeCommandAction Command="{Binding CancelPressedCommand}"/>
+                        <i:ChangePropertyAction TargetObject="{Binding ElementName=FolderPicker, Path=DataContext}" PropertyName="IsFolderPickerVisible" Value="False"/>
+                    </i:EventTriggerBehavior>
+                </i:Interaction.Behaviors>
+            </FontIcon>
+        </StackPanel>
 
         <i:Interaction.Behaviors>
             <i:EventTriggerBehavior EventName="Loaded">
@@ -69,4 +105,13 @@
             </i:EventTriggerBehavior>
         </i:Interaction.Behaviors>
     </Grid>
+
+    <i:Interaction.Behaviors>
+        <i:DataTriggerBehavior Binding="{Binding IsFolderPickerVisible}" Value="False">
+            <i:ChangePropertyAction PropertyName="Visibility" Value="Collapsed"/>
+        </i:DataTriggerBehavior>
+        <i:DataTriggerBehavior Binding="{Binding IsFolderPickerVisible}" Value="True">
+            <i:ChangePropertyAction PropertyName="Visibility" Value="Visible"/>
+        </i:DataTriggerBehavior>
+    </i:Interaction.Behaviors>
 </UserControl>

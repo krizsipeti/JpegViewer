@@ -1,5 +1,6 @@
 ﻿using System;
 using JpegViewer.App.Core.Interfaces;
+using JpegViewer.App.Core.Services;
 using JpegViewer.App.UI.Services;
 using JpegViewer.App.Vmd;
 using JpegViewer.App.Vmd.Controls;
@@ -35,6 +36,7 @@ namespace JpegViewer.App.UI
             services.AddSingleton<VmdCtrlPhoto>();
             services.AddSingleton<VmdCtrlTimeline>();
             services.AddSingleton<IDispatcherService, DispatcherService>();
+            services.AddSingleton<IImageService, ImageService>();
             Services = services.BuildServiceProvider();
         }
 

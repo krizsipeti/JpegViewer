@@ -28,7 +28,10 @@
             <Setter Property="FontFamily" Value="Segoe Fluent Icons"/>
             <Setter Property="FontSize" Value="32"/>
             <Setter Property="Foreground" Value="#9EA0A2"/>
-            <Setter Property="Glyph" Value="&#xe91b;"/>
+        </Style>
+
+        <Style x:Name="PlayControlFontIconStyle" TargetType="FontIcon" BasedOn="{StaticResource TimelineFontIconStyle}">
+            <Setter Property="FontSize" Value="40"/>
         </Style>
 
         <StackLayout x:Key="HorizontalStackLayout" Orientation="Horizontal"/>
@@ -63,7 +66,8 @@
                                 <TextBlock Text="{x:Bind support:StringFormatter.TimeLineItemUnitText(Type, Value)}" Style="{StaticResource TimelineTextStyle}"/>
                                 <FontIcon Grid.Row="1"
                                           Visibility="{x:Bind support:XamlBindHelpers.CountToVisibility(Images)}"
-                                          Style="{StaticResource TimelineFontIconStyle}"/>
+                                          Style="{StaticResource TimelineFontIconStyle}"
+                                          Glyph="{x:Bind support:XamlBindHelpers.GetPictureIconBasedOnCount(Images)}"/>
                             </Grid>
                         </DataTemplate>
                     </ItemsRepeater.ItemTemplate>
@@ -77,27 +81,49 @@
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
 
-        <TextBlock Margin="16 0 0 8" Text="Timeline view of pictures" FontSize="32" HorizontalAlignment="Left" Foreground="#F2F3F3"/>        
+        <TextBlock Margin="16 0 0 8" Text="Timeline view of pictures" FontSize="16" HorizontalAlignment="Left" Foreground="#F2F3F3"/>        
         <Border BorderThickness="1" VerticalAlignment="Bottom"/>
         
         <ScrollViewer x:Name="scrollViewer" Grid.Row="1"
                       HorizontalScrollBarVisibility="Auto"
                       VerticalScrollBarVisibility="Disabled"
-                      IsVerticalScrollChainingEnabled="False">
+                      IsVerticalScrollChainingEnabled="False"
+                      ViewChanged="scrollViewer_ViewChanged"
+                      LayoutUpdated="scrollViewer_LayoutUpdated">
             <ItemsRepeater x:Name="itemsRepeater"
                            ItemsSource="{Binding Items}"
                            ItemTemplate="{StaticResource TimelineItemTemplate}"
-                           Layout="{StaticResource HorizontalStackLayout}"
+                           Layout="{StaticResource HorizontalStackLayout}"                           
                            PointerWheelChanged="ItemsRepeater_PointerWheelChanged"/>
         </ScrollViewer>        
-        <Border Grid.Row="2" HorizontalAlignment="Center" BorderThickness="1" PointerWheelChanged="ItemsRepeater_PointerWheelChanged"/>
+        <Border Grid.Row="1" HorizontalAlignment="Center" BorderThickness="1" PointerWheelChanged="ItemsRepeater_PointerWheelChanged"/>
+        <Rectangle Grid.Row="2" Fill="#2C2E2F"/>
+        <Border Grid.Row="2" VerticalAlignment="Top" BorderThickness="1"/>
+        <StackPanel Grid.Row="2" Margin="0 9 0 8" Orientation="Horizontal" HorizontalAlignment="Center">
+            <FontIcon Style="{StaticResource PlayControlFontIconStyle}"
+                      Glyph="&#xf08d;"
+                      ToolTipService.ToolTip="Previous"
+                      PointerEntered="FontIcon_PointerEntered"
+                      PointerExited="FontIcon_PointerExited"
+                      PointerPressed="FontIcon_PointerPressed"
+                      PointerReleased="FontIcon_PointerReleased"/>
+            <FontIcon Margin="16 0 16 0"
+                      Style="{StaticResource PlayControlFontIconStyle}"
+                      Glyph="&#xe786;" ToolTipService.ToolTip="Slideshow"                      
+                      PointerEntered="FontIcon_PointerEntered"
+                      PointerExited="FontIcon_PointerExited"
+                      PointerPressed="FontIcon_PointerPressed"
+                      PointerReleased="FontIcon_PointerReleased"/>
+            <FontIcon Style="{StaticResource PlayControlFontIconStyle}"
+                      Glyph="&#xf08f;"
+                      ToolTipService.ToolTip="Next"
+                      PointerEntered="FontIcon_PointerEntered"
+                      PointerExited="FontIcon_PointerExited"
+                      PointerPressed="FontIcon_PointerPressed"
+                      PointerReleased="FontIcon_PointerReleased"/>
+        </StackPanel>
     </Grid>
-    
-    <i:Interaction.Behaviors>
-        <i:EventTriggerBehavior EventName="Loaded">
-            <i:InvokeCommandAction Command="{Binding LoadedCommand}"/>
-        </i:EventTriggerBehavior>
-    </i:Interaction.Behaviors>
 </UserControl>

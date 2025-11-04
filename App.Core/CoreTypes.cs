@@ -1,4 +1,9 @@
-﻿using JpegViewer.App.Core.Models;
+﻿using System;
+using System.Collections.Generic;
+using System.Collections.ObjectModel;
+using System.Collections.Specialized;
+using System.ComponentModel;
+using JpegViewer.App.Core.Models;
 
 namespace JpegViewer.App.Core.Types
 {
@@ -64,5 +69,21 @@ namespace JpegViewer.App.Core.Types
         Hour,
         Minute,
         Second
+    }
+
+    /// <summary>
+    /// Message sent from view model to code behind on position change.
+    /// </summary>
+    /// <param name="NewPosition"></param>
+    /// <param name="TimelineItem"></param>
+    public record TimelineCurrentPositionChange(DateTime NewPosition, TimelineItem? TimelineItem);
+
+    /// <summary>
+    /// How image search should be done on a specific folder.
+    /// </summary>
+    public enum ESubFolderRecursion
+    {
+        ExcludeSubFolders,
+        IncludeSubFolders
     }
 }

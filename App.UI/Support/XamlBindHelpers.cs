@@ -2,6 +2,7 @@
 using System.Linq;
 using JpegViewer.App.Core.Models;
 using Microsoft.UI.Xaml;
+using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Media;
 
 namespace JpegViewer.App.UI.Support
@@ -38,6 +39,16 @@ namespace JpegViewer.App.UI.Support
         {
             AlternationHelper = !AlternationHelper;
             return AlternationHelper ? colorA : colorB;
+        }
+
+        /// <summary>
+        /// Returns a picture icon based on the count of the given collection.
+        /// </summary>
+        /// <param name="images"></param>
+        /// <returns></returns>
+        public static string GetPictureIconBasedOnCount(IEnumerable<ImageInfo> images)
+        {
+            return images?.Count() > 1 ? char.ConvertFromUtf32(0xe7aa) : char.ConvertFromUtf32(0xe91b);
         }
     }
 }

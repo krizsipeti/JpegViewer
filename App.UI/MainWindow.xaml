@@ -6,6 +6,7 @@
     xmlns:local="using:JpegViewer.App.UI"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:i="using:Microsoft.Xaml.Interactivity"
     xmlns:control="using:JpegViewer.App.UI.Controls"
     mc:Ignorable="d"
     Title="JpegViewer">
@@ -29,14 +30,63 @@
             <ColumnDefinition Width="*"/>
         </Grid.ColumnDefinitions>
 
-        <Grid Grid.ColumnSpan="3" Background="#2C2E2F"/>
+        <!-- Command bar -->
+        <Grid Grid.ColumnSpan="3" Background="#2C2E2F">
+            <StackPanel x:Name="OpenFolderButton"
+                        Margin="8 4 0 4"
+                        Orientation="Horizontal"
+                        HorizontalAlignment="Left"
+                        PointerEntered="StackPanel_PointerEntered"
+                        PointerExited="StackPanel_PointerExited"
+                        PointerPressed="StackPanel_PointerPressed"
+                        PointerReleased="StackPanel_PointerReleased">
+                <FontIcon Margin="8 0 4 0"
+                      HorizontalAlignment="Left"
+                      Glyph="&#xed25;"
+                      FontSize="24"/>
+                <TextBlock Margin="0 0 4 0" VerticalAlignment="Center" Text="Open folder" FontSize="14"/>
+                <i:Interaction.Behaviors>
+                    <i:EventTriggerBehavior EventName="PointerEntered">
+                        <i:ChangePropertyAction TargetObject="{Binding ElementName=OpenFolderButton}" PropertyName="Background" Value="#3D3D3D"/>
+                    </i:EventTriggerBehavior>
+                    <i:EventTriggerBehavior EventName="PointerExited">
+                        <i:ChangePropertyAction TargetObject="{Binding ElementName=OpenFolderButton}" PropertyName="Background" Value="Transparent"/>
+                    </i:EventTriggerBehavior>
+                    <i:EventTriggerBehavior EventName="PointerReleased">
+                        <i:InvokeCommandAction Command="{Binding SelectFolderCommand}"/>
+                    </i:EventTriggerBehavior>
+                </i:Interaction.Behaviors>
+            </StackPanel>
+            <StackPanel x:Name="MenuButton"
+                        Margin="8 4 8 4"
+                        Orientation="Horizontal"
+                        HorizontalAlignment="Right"
+                        PointerEntered="StackPanel_PointerEntered"
+                        PointerExited="StackPanel_PointerExited"
+                        PointerPressed="StackPanel_PointerPressed"
+                        PointerReleased="StackPanel_PointerReleased">
+                <FontIcon Margin="8 2 8 0"
+                          HorizontalAlignment="Left"
+                          Glyph="&#xe700;"
+                          FontSize="24"/>
+                <i:Interaction.Behaviors>
+                    <i:EventTriggerBehavior EventName="PointerEntered">
+                        <i:ChangePropertyAction TargetObject="{Binding ElementName=MenuButton}" PropertyName="Background" Value="#3D3D3D"/>
+                    </i:EventTriggerBehavior>
+                    <i:EventTriggerBehavior EventName="PointerExited">
+                        <i:ChangePropertyAction TargetObject="{Binding ElementName=MenuButton}" PropertyName="Background" Value="Transparent"/>
+                    </i:EventTriggerBehavior>
+                </i:Interaction.Behaviors>
+            </StackPanel>
+        </Grid>
+        
         <Border Grid.Row="1" Grid.ColumnSpan="3"/>
         <Border Grid.Row="2" Grid.Column="1"/>
         <control:CtrlFolderPicker x:Name="folderPicker" Grid.Row="2"/>
         <control:CtrlPhoto x:Name="photoViewer" Grid.Row="2" Grid.Column="2"/>
         <Border Grid.Row="3" Grid.ColumnSpan="3"/>
         <control:CtrlTimeline x:Name="timeline" Grid.Row="4" Grid.ColumnSpan="3"/>
-        <Rectangle Grid.Row="5" Grid.ColumnSpan="3" Fill="#2C2E2F"/>
+        <Rectangle Grid.Row="5" Grid.ColumnSpan="3" Fill="#313131"/>
         <Border Grid.Row="5" Grid.ColumnSpan="3" BorderThickness="1" VerticalAlignment="Top"/>
     </Grid>
 </Window>

@@ -15,8 +15,21 @@ namespace JpegViewer.App.Vmd.Controls
     /// View model for folder picker control.
     /// </summary>
     public partial class VmdCtrlFolderPicker : VmdBase, IRecipient<FolderPickerItemExpandedMessage>
-
     {
+        private FolderPickerItem? _selectedItem;
+
+        /// <summary>
+        /// Holds the current selected folder item if any.
+        /// </summary>
+        public FolderPickerItem? SelectedItem
+        {
+            get => _selectedItem;
+            set => SetProperty(ref _selectedItem, value);
+        }
+
+        /// <summary>
+        /// Holds the loaded folder items.
+        /// </summary>
         public ObservableCollection<FolderPickerItem> Folders { get; } = new ObservableCollection<FolderPickerItem>();
 
         /// <summary>
@@ -26,6 +39,23 @@ namespace JpegViewer.App.Vmd.Controls
         {
             // Register this instance to receive messages
             WeakReferenceMessenger.Default.Register<FolderPickerItemExpandedMessage>(this);
+        }
+
+        /// <summary>
+        /// Hide 
+        /// </summary>
+        [RelayCommand]
+        private void OkPressed()
+        {
+        }
+
+        /// <summary>
+        /// Clear current selection.
+        /// </summary>
+        [RelayCommand]
+        private void CancelPressed()
+        {
+            SelectedItem = null;
         }
 
         /// <summary>

@@ -32,6 +32,11 @@ namespace JpegViewer.App.Core.Models
         }
 
         /// <summary>
+        /// Retrieves the full path of this folder item.
+        /// </summary>
+        public string FullPath { get => GetFullPath(); }
+
+        /// <summary>
         /// True if the folder item is expanded to show its child items.
         /// </summary>
         public bool IsExpanded

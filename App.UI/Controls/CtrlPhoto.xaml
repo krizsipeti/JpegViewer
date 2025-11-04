@@ -9,9 +9,6 @@
     mc:Ignorable="d">
 
     <Grid x:Name="root" Background="#1E1F23">
-        <StackPanel Orientation="Vertical">
-            <TextBlock Text="Photo Viewer" FontSize="32" HorizontalAlignment="Right"/>
-            <Image x:Name="photoImage" Stretch="Uniform"/>
-        </StackPanel>
+        <Image x:Name="photoImage" Stretch="Uniform"/>
     </Grid>
 </UserControl>
