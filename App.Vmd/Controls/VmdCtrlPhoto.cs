@@ -1,5 +1,4 @@
-﻿using System.Threading.Tasks;
-using JpegViewer.App.Core.Interfaces;
+﻿using JpegViewer.App.Core.Interfaces;
 using JpegViewer.App.Core.Models;
 using Microsoft.UI.Xaml.Media.Imaging;
 

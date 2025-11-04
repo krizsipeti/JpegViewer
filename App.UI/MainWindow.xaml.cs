@@ -2,6 +2,7 @@ using JpegViewer.App.UI.Support;
 using JpegViewer.App.Vmd;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
+using Microsoft.UI.Xaml.Controls.Primitives;
 
 namespace JpegViewer.App.UI
 {
@@ -59,6 +60,10 @@ namespace JpegViewer.App.UI
         private void StackPanel_PointerReleased(object sender, Microsoft.UI.Xaml.Input.PointerRoutedEventArgs e)
         {
             Animation.DoAnimationPointerReleased(sender);
+            if ((sender as StackPanel) == MenuButton)
+            {
+                FlyoutBase.ShowAttachedFlyout(MenuButton);
+            }
             e.Handled = true;
         }
     }

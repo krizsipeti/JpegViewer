@@ -77,6 +77,20 @@
                         <i:ChangePropertyAction TargetObject="{Binding ElementName=MenuButton}" PropertyName="Background" Value="Transparent"/>
                     </i:EventTriggerBehavior>
                 </i:Interaction.Behaviors>
+                <FlyoutBase.AttachedFlyout>
+                    <MenuFlyout Placement="BottomEdgeAlignedRight">
+                        <MenuFlyoutItem Text="Open folder"/>
+                        <MenuFlyoutSubItem Text="View">
+                            <RadioMenuFlyoutItem Text="Fill" GroupName="view"/>
+                            <RadioMenuFlyoutItem Text="Uniform" IsChecked="True" GroupName="view"/>
+                            <RadioMenuFlyoutItem Text="Uniform to fill" GroupName="view"/>
+                        </MenuFlyoutSubItem>
+                        <MenuFlyoutItem Text="Image details"/>
+                        <MenuFlyoutSeparator/>
+                        <MenuFlyoutItem Text="Help"/>
+                        <MenuFlyoutItem Text="About"/>
+                    </MenuFlyout>
+                </FlyoutBase.AttachedFlyout>
             </StackPanel>
         </Grid>
         
