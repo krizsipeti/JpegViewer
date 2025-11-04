@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Threading.Tasks;
 
 namespace JpegViewer.App.Core.Interfaces
 {
@@ -17,5 +18,12 @@ namespace JpegViewer.App.Core.Interfaces
         /// Calls the specified action on the dispatcher thread.
         /// </summary>
         void Invoke(Action action);
+
+        /// <summary>
+        /// Calls the specified async action on the dispatcher thread.
+        /// </summary>
+        /// <param name="func"></param>
+        /// <returns></returns>
+        Task InvokeAsync(Func<Task> func);
     }
 }

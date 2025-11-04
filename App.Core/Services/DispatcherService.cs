@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Threading.Tasks;
 using JpegViewer.App.Core.Interfaces;
 using Windows.System;
 
@@ -51,6 +52,37 @@ namespace JpegViewer.App.UI.Services
                 return;
             }
             DispatcherQueue.TryEnqueue(() => action());
+        }
+
+        /// <summary>
+        /// Calls the specified async action on the dispatcher thread.
+        /// </summary>
+        /// <param name="func"></param>
+        /// <returns></returns>
+        public Task InvokeAsync(Func<Task> func)
+        {
+            if (func == null) return Task.CompletedTask;
+
+            if (CheckAccess())
+            {
+                // already on UI thread: run and return the task
+                return func();
+            }
+
+            var tcs = new TaskCompletionSource<object?>(TaskCreationOptions.RunContinuationsAsynchronously);
+            DispatcherQueue.TryEnqueue(async () =>
+            {
+                try
+                {
+                    await func().ConfigureAwait(false);
+                    tcs.SetResult(null);
+                }
+                catch (Exception ex)
+                {
+                    tcs.SetException(ex);
+                }
+            });
+            return tcs.Task;
         }
 
         #endregion Public Methods

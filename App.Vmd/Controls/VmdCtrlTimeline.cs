@@ -6,7 +6,6 @@ using System.Threading.Tasks;
 using JpegViewer.App.Core.Interfaces;
 using JpegViewer.App.Core.Models;
 using JpegViewer.App.Core.Types;
-using static System.Net.Mime.MediaTypeNames;
 
 
 namespace JpegViewer.App.Vmd.Controls
@@ -20,6 +19,7 @@ namespace JpegViewer.App.Vmd.Controls
         private DateTime _currentPosition;
         private double _itemsWidth;
         private ETimelineZoomLevel _zoomLevel = ETimelineZoomLevel.Seconds;
+        private readonly object _itemsLock = new object();
 
         /// <summary>
         /// Holds a reference to the only ImageService.
@@ -32,14 +32,13 @@ namespace JpegViewer.App.Vmd.Controls
         public DateTime CurrentPosition
         {
             get => _currentPosition;
-            set
-            {
-                if (SetProperty(ref _currentPosition, value))
-                {
-                    //WeakReferenceMessenger.Default.Send(new TimelineCurrentPositionChange(value, null));
-                    System.Diagnostics.Debug.WriteLine(CurrentPosition.ToString("F"));
-                }
-            }
+            set => SetProperty(ref _currentPosition, value);
+            //{
+            //    if (SetProperty(ref _currentPosition, value))
+            //    {
+            //        Task.Run(() => RefreshTimeLineItems());
+            //    }
+            //}
         }
 
         /// <summary>
@@ -131,7 +130,7 @@ namespace JpegViewer.App.Vmd.Controls
             CurrentPosition = DateTime.Now;
             ZoomLevel = ETimelineZoomLevel.Years;
             ImageService = imageService;
-            ImageService.ImageFound += ImageService_ImageFound;
+            //ImageService.ImageFound += ImageService_ImageFound;
             ImageService.ImagesLoaded += ImageService_ImagesLoaded;
         }
 
@@ -168,12 +167,118 @@ namespace JpegViewer.App.Vmd.Controls
             {
                 DispatcherService.Invoke(() =>
                 {
-                    Items.Clear();
-                    foreach (var item in itemsList)
+                    lock (_itemsLock)
                     {
-                        Items.Add(item);
+                        Items.Clear();
+                        foreach (var item in itemsList)
+                        {
+                            Items.Add(item);
+                        }
                     }
                 });
+            }
+        }
+
+        /// <summary>
+        /// Updates time line when scrolling toward the left or right end.
+        /// </summary>
+        private void RefreshTimeLineItems()
+        {
+            if (ImageService.MinDateTaken == null) return;
+            lock (_itemsLock)
+            {
+                if (CurrentPosition - StartPosition < EndPosition - CurrentPosition)
+                {
+                    // We are closer to the start (left end) of our time line
+                    // Check if there are images created before our current start position
+                    if (/*(*/ImageService.MinDateTaken /*- (Items.First().Duration * 3))*/ < StartPosition)
+                    {
+                        int amountToAdd = (int)((CurrentPosition - StartPosition).TotalMicroseconds / Items.First().Duration.TotalMicroseconds);
+                        if (amountToAdd <= 0)
+                        {
+                            return;
+                        }
+
+                        List<TimelineItem>? itemsList = null;
+                        switch (ZoomLevel)
+                        {
+                            case ETimelineZoomLevel.Years:
+                                itemsList = GetItemsForYearZoom(StartPosition.AddYears(-(amountToAdd * 10)), StartPosition.AddYears(-10));
+                                break;
+                            case ETimelineZoomLevel.Months:
+                                itemsList = GetItemsForMonthZoom(StartPosition.AddYears(-amountToAdd), StartPosition.AddYears(-1));
+                                break;
+                            case ETimelineZoomLevel.Days:
+                                itemsList = GetItemsForDayZoom(StartPosition.AddMonths(-amountToAdd), StartPosition.AddMonths(-1));
+                                break;
+                            case ETimelineZoomLevel.Hours:
+                                itemsList = GetItemsForHourZoom(StartPosition.AddDays(-amountToAdd), StartPosition.AddDays(-1));
+                                break;
+                            case ETimelineZoomLevel.Minutes:
+                                itemsList = GetItemsForMinuteZoom(StartPosition.AddHours(-amountToAdd), StartPosition.AddHours(-1));
+                                break;
+                            case ETimelineZoomLevel.Seconds:
+                                itemsList = GetItemsForSecondZoom(StartPosition.AddMinutes(-amountToAdd), StartPosition.AddMinutes(-1));
+                                break;
+                        }
+
+                        if (itemsList == null) return;
+                        DispatcherService.Invoke(() =>
+                        {
+                            for (int i = itemsList.Count - 1; i >= 0; i--)
+                            {
+                                Items.Insert(0, itemsList[i]);
+                                Items.RemoveAt(Items.Count - 1);
+                            }
+                        });                        
+                    }
+                }
+                else
+                {
+                    // We are closer to the end (right side) of our time line
+                    // Check if there are images created after our current end position
+                    if (/*(*/ImageService.MaxDateTaken/* + (Items.Last().Duration * 3))*/ > EndPosition)
+                    {
+                        int amountToAdd = (int)((EndPosition - CurrentPosition).TotalMicroseconds / Items.Last().Duration.TotalMicroseconds);
+                        if (amountToAdd <= 0)
+                        {
+                            return;
+                        }
+
+                        List<TimelineItem>? itemsList = null;
+                        switch (ZoomLevel)
+                        {
+                            case ETimelineZoomLevel.Years:
+                                itemsList = GetItemsForYearZoom(EndPosition.AddYears(10), EndPosition.AddYears(amountToAdd * 10));
+                                break;
+                            case ETimelineZoomLevel.Months:
+                                itemsList = GetItemsForMonthZoom(EndPosition.AddYears(1), StartPosition.AddYears(amountToAdd));
+                                break;
+                            case ETimelineZoomLevel.Days:
+                                itemsList = GetItemsForDayZoom(EndPosition.AddMonths(1), StartPosition.AddMonths(amountToAdd));
+                                break;
+                            case ETimelineZoomLevel.Hours:
+                                itemsList = GetItemsForHourZoom(EndPosition.AddDays(1), StartPosition.AddDays(amountToAdd));
+                                break;
+                            case ETimelineZoomLevel.Minutes:
+                                itemsList = GetItemsForMinuteZoom(EndPosition.AddHours(1), StartPosition.AddHours(amountToAdd));
+                                break;
+                            case ETimelineZoomLevel.Seconds:
+                                itemsList = GetItemsForSecondZoom(EndPosition.AddMinutes(1), StartPosition.AddMinutes(amountToAdd));
+                                break;
+                        }
+
+                        if (itemsList == null) return;
+                        DispatcherService.Invoke(() =>
+                        {
+                            for (int i = 0; i < itemsList.Count; i++)
+                            {
+                                Items.Insert(Items.Count(), itemsList[i]);
+                                Items.RemoveAt(0);
+                            }
+                        });
+                    }
+                }
             }
         }
 
@@ -202,14 +307,17 @@ namespace JpegViewer.App.Vmd.Controls
             }
             
             var itemsList = GetItemsForYearZoom(new DateTime(e.DateTaken.Year - 20, 1, 1), new DateTime(e.DateTaken.Year + 20, 1, 1));
-            DispatcherService.Invoke(new Action(() =>
+            DispatcherService.Invoke(() =>
             {
-                Items.Clear();
-                foreach (var item in itemsList)
+                lock (_itemsLock)
                 {
-                    Items.Add(item);
+                    Items.Clear();
+                    foreach (var item in itemsList)
+                    {
+                        Items.Add(item);
+                    }
                 }
-            }));
+            });
         }
 
         /// <summary>

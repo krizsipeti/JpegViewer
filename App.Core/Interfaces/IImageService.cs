@@ -1,7 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 using JpegViewer.App.Core.Models;
 using JpegViewer.App.Core.Types;
+using Microsoft.UI.Xaml.Media.Imaging;
 
 namespace JpegViewer.App.Core.Interfaces
 {
@@ -16,6 +18,16 @@ namespace JpegViewer.App.Core.Interfaces
         /// Happens when image service finishes loading images from the specified folder.
         /// </summary>
         event EventHandler<ImageInfo>? ImagesLoaded;
+
+        /// <summary>
+        /// Creation time of the eraliest picture.
+        /// </summary>
+        DateTime? MinDateTaken { get; }
+
+        /// <summary>
+        /// Creation time of the latest picture.
+        /// </summary>
+        DateTime? MaxDateTaken { get; }
 
         /// <summary>
         /// Load the images in an asyn method.
@@ -33,5 +45,12 @@ namespace JpegViewer.App.Core.Interfaces
         /// <param name="end"></param>
         /// <returns></returns>
         List<ImageInfo> GetImagesForDateRange(DateTime start, DateTime end);
+
+        /// <summary>
+        /// Create a bitmap image from the given ImageInfo.
+        /// </summary>
+        /// <param name="imgInfo"></param>
+        /// <returns></returns>
+        Task<BitmapImage?> GetBimap(ImageInfo imgInfo);
     }
 }

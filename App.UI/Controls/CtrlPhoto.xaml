@@ -9,6 +9,6 @@
     mc:Ignorable="d">
 
     <Grid x:Name="root" Background="#1E1F23">
-        <Image x:Name="photoImage" Stretch="Uniform"/>
+        <Image x:Name="photoImage" Stretch="Uniform" Source="{Binding CurrentBitmap}"/>
     </Grid>
 </UserControl>

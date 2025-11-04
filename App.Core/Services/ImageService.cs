@@ -9,7 +9,10 @@ using JpegViewer.App.Core.Models;
 using JpegViewer.App.Core.Types;
 using MetadataExtractor;
 using MetadataExtractor.Formats.Exif;
-using static System.Net.Mime.MediaTypeNames;
+using Microsoft.UI.Xaml.Media.Imaging;
+using Microsoft.UI.Xaml.Shapes;
+using Windows.Storage;
+using Windows.Storage.Streams;
 
 namespace JpegViewer.App.Core.Services
 {
@@ -18,7 +21,7 @@ namespace JpegViewer.App.Core.Services
         /// <summary>
         /// Lock object to protect our images list.
         /// </summary>
-        private object _lockImages = new object();
+        private readonly object _lockImages = new object();
 
         /// <summary>
         /// Holds a cancellation token for the async LoadImages function.
@@ -36,6 +39,11 @@ namespace JpegViewer.App.Core.Services
         private string[] ExtensionPatterns { get; } = new[] { "*.jpg", "*.jpeg" };
 
         /// <summary>
+        /// Holds the loaded images.
+        /// </summary>
+        private List<ImageInfo> Images { get; } = new List<ImageInfo>();
+
+        /// <summary>
         /// An event happen when a new image is loaded.
         /// Clients can register for this event to get notified about new images.
         /// </summary>
@@ -48,9 +56,72 @@ namespace JpegViewer.App.Core.Services
         public event EventHandler<ImageInfo>? ImagesLoaded;
 
         /// <summary>
-        /// Holds the loaded images.
+        /// Creation time of the eraliest picture.
         /// </summary>
-        private List<ImageInfo> Images { get; } = new List<ImageInfo>();
+        public DateTime? MinDateTaken
+        {
+            get
+            {
+                lock (_lockImages)
+                {
+                    return Images?.MinBy(i => i.DateTaken)?.DateTaken;
+                }
+            }
+        }
+
+        /// <summary>
+        /// Creation time of the latest picture.
+        /// </summary>
+        public DateTime? MaxDateTaken
+        {
+            get
+            {
+                lock (_lockImages)
+                {
+                    return Images?.MaxBy(i => i.DateTaken)?.DateTaken;
+                }
+            }
+        }
+
+        /// <summary>
+        /// Returns images belonging to the range specified by start and end.
+        /// </summary>
+        /// <param name="start"></param>
+        /// <param name="end"></param>
+        /// <returns></returns>
+        /// <exception cref="NotImplementedException"></exception>
+        public List<ImageInfo> GetImagesForDateRange(DateTime start, DateTime end)
+        {
+            lock (_lockImages)
+            {
+                return Images.Where(i => i.DateTaken >= start && i.DateTaken <= end).ToList();
+            }
+        }
+
+        /// <summary>
+        /// Creates a bitmap from the given ImageInfo.
+        /// </summary>
+        /// <param name="imgInfo"></param>
+        /// <returns></returns>
+        public async Task<BitmapImage?> GetBimap(ImageInfo imgInfo)
+        {
+            try
+            {
+                StorageFile storageFile = await StorageFile.GetFileFromPathAsync(imgInfo.Path);
+                using IRandomAccessStream fileStream = await storageFile.OpenReadAsync();
+
+                // Create a bitmap to be the image source.
+                BitmapImage bitmapImage = new();
+                bitmapImage.SetSource(fileStream);
+
+                return bitmapImage;
+            }
+            catch (Exception e)
+            {
+                System.Diagnostics.Debug.WriteLine(e.Message);
+            }
+            return null;
+        }
 
         /// <summary>
         /// 
@@ -69,21 +140,6 @@ namespace JpegViewer.App.Core.Services
             CancellationToken = new CancellationTokenSource();
             ImageLoadTask = LoadImages(CancellationToken.Token, path, subFolderRecursion, maxRecursionDepth);
             await ImageLoadTask;
-        }
-
-        /// <summary>
-        /// Returns images belonging to the range specified by start and end.
-        /// </summary>
-        /// <param name="start"></param>
-        /// <param name="end"></param>
-        /// <returns></returns>
-        /// <exception cref="NotImplementedException"></exception>
-        public List<ImageInfo> GetImagesForDateRange(DateTime start, DateTime end)
-        {
-            lock (_lockImages)
-            {
-                return Images.Where(i => i.DateTaken >= start &&  i.DateTaken <= end).ToList();
-            }
         }
 
         /// <summary>
@@ -155,12 +211,18 @@ namespace JpegViewer.App.Core.Services
                         }
                         OnImageFound(image);
                     }
-                    catch { }; // We continue on exception
+                    catch (Exception e)
+                    {
+                        System.Diagnostics.Debug.WriteLine(e.Message); // We continue on exception
+                    }
                     await Task.Yield();
                 }
                 OnImagesLoaded(Images.First());
             }
-            catch { }
+            catch (Exception e)
+            {
+                System.Diagnostics.Debug.WriteLine(e.Message);
+            }
         }
 
         /// <summary>

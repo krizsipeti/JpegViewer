@@ -84,7 +84,8 @@
             <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
 
-        <TextBlock Margin="16 0 0 8" Text="Timeline view of pictures" FontSize="16" HorizontalAlignment="Left" Foreground="#F2F3F3"/>        
+        <TextBlock Margin="16 0 0 8" Text="Timeline view of pictures" FontSize="16" HorizontalAlignment="Left" Foreground="#F2F3F3"/>
+        <TextBlock Margin="0 4 0 8" HorizontalAlignment="Center" Text="{Binding CurrentPosition}" Foreground="#9EA0A2"/>
         <Border BorderThickness="1" VerticalAlignment="Bottom"/>
         
         <ScrollViewer x:Name="scrollViewer" Grid.Row="1"
