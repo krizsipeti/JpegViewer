@@ -39,11 +39,6 @@ namespace JpegViewer.App.UI.Controls
         private double StartPointerX { get; set; }
 
         /// <summary>
-        /// Holds a previous time point where dragging happened.
-        /// </summary>
-        private DateTime LastTime { get; set; }
-
-        /// <summary>
         /// Initializes a new instance of the <see cref="CtrlTimeline"/> class.
         /// </summary>
         public CtrlTimeline()
@@ -159,7 +154,6 @@ namespace JpegViewer.App.UI.Controls
                 IsDragging = true;
                 StartPointerX = pt.Position.X;
                 StartOffset = scrollViewer.HorizontalOffset;
-                LastTime = DateTime.UtcNow;
 
                 UIElement? uiSender = sender as UIElement;
                 if (uiSender != null)
@@ -182,13 +176,10 @@ namespace JpegViewer.App.UI.Controls
 
             var pt = e.GetCurrentPoint(scrollViewer);
             var currentX = pt.Position.X;
-            var now = DateTime.UtcNow;
-            var dt = (now - LastTime).TotalMilliseconds;
 
             var delta = StartPointerX - currentX; // move opposite to pointer
             var newOffset = StartOffset + delta;
             scrollViewer.ChangeView(newOffset, null, null, true);
-            LastTime = now;
             e.Handled = true;
         }
 
