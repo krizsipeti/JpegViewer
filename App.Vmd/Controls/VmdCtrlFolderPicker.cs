@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.IO;
 using System.Linq;
@@ -17,6 +18,7 @@ namespace JpegViewer.App.Vmd.Controls
     public partial class VmdCtrlFolderPicker : VmdBase, IRecipient<FolderPickerItemExpandedMessage>
     {
         private FolderPickerItem? _selectedItem;
+        private readonly object _lockRefresh = new object();
 
         /// <summary>
         /// Holds the current selected folder item if any.
@@ -39,6 +41,16 @@ namespace JpegViewer.App.Vmd.Controls
         {
             // Register this instance to receive messages
             WeakReferenceMessenger.Default.Register<FolderPickerItemExpandedMessage>(this);
+        }
+
+        /// <summary>
+        /// Refreshes the folder list by reloading the folder tree.
+        /// </summary>
+        /// <returns></returns>
+        [RelayCommand]
+        private async Task RefreshPressed()
+        {
+            await Task.Run(() => LoadDrives());
         }
 
         /// <summary>
@@ -87,30 +99,37 @@ namespace JpegViewer.App.Vmd.Controls
         /// </summary>
         private void LoadDrives()
         {
-            try
+            lock (_lockRefresh)
             {
-                // Get drives and their root directories
-                var list = new List<FolderPickerItem>();
-                foreach (var drive in DriveInfo.GetDrives().Where(d => d.IsReady && (d.DriveType == DriveType.Fixed || d.DriveType == DriveType.Removable || d.DriveType == DriveType.CDRom)).Select(d => new FolderPickerItem(d.Name)))
+                try
                 {
-                    foreach (var item in Directory.EnumerateDirectories(drive.Name).Select(d => Path.GetFileName(d) ?? string.Empty).Where(d => !string.IsNullOrWhiteSpace(d)).Select(d => new FolderPickerItem(d, drive)))
-                    {
-                        drive.Childs.Add(item);
-                    }
-                    list.Add(drive);
-                }
+                    // First clear the folders collection
+                    DispatcherService.Invoke(() => Folders.Clear());
 
-                // Update the Folders collection on the UI thread
-                DispatcherService.Invoke(() =>
-                {
-                    foreach (var drive in list)
+                    // Get drives and their root directories
+                    var list = new List<FolderPickerItem>();
+                    foreach (var drive in DriveInfo.GetDrives().Where(d => d.IsReady && (d.DriveType == DriveType.Fixed || d.DriveType == DriveType.Removable || d.DriveType == DriveType.CDRom)).Select(d => new FolderPickerItem(d.Name)))
                     {
-                        Folders.Add(drive);
+                        foreach (var item in Directory.EnumerateDirectories(drive.Name).Select(d => Path.GetFileName(d) ?? string.Empty).Where(d => !string.IsNullOrWhiteSpace(d)).Select(d => new FolderPickerItem(d, drive)))
+                        {
+                            drive.Childs.Add(item);
+                        }
+                        list.Add(drive);
                     }
-                });
-            }
-            catch
-            {
+
+                    // Update the Folders collection on the UI thread
+                    DispatcherService.Invoke(() =>
+                    {
+                        foreach (var drive in list)
+                        {
+                            Folders.Add(drive);
+                        }
+                    });
+                }
+                catch (Exception e)
+                {
+                    System.Diagnostics.Debug.WriteLine(e.Message);
+                }
             }
         }
 

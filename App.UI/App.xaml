@@ -11,7 +11,15 @@
                 <!-- Other merged dictionaries here -->
             </ResourceDictionary.MergedDictionaries>
             <!-- Other app resources here -->
-            
+
+            <SolidColorBrush x:Key="colorBackground" Color="#1E1F23"/>
+            <SolidColorBrush x:Key="colorForeground" Color="#F2F3F3"/>
+            <SolidColorBrush x:Key="colorIconForeground" Color="#9EA0A2"/>
+            <SolidColorBrush x:Key="colorButtonHover" Color="#3D3D3D"/>
+            <SolidColorBrush x:Key="colorStatusBarBackground" Color="#313131"/>
+            <SolidColorBrush x:Key="colorControlBackground" Color="#2C2E2F"/>
+            <SolidColorBrush x:Key="colorTimelineItemBackground" Color="#202124"/>
+            <SolidColorBrush x:Key="colorTimelineItemBorder" Color="#26272B"/>
             <SolidColorBrush x:Key="colorA" Color="#202124"/>
             <SolidColorBrush x:Key="colorB" Color="#1F2024"/>
 
@@ -21,16 +29,17 @@
             </Style>
 
             <Style TargetType="TextBlock">
-                <Setter Property="Foreground" Value="#F2F3F3"/>
+                <Setter Property="Foreground" Value="{StaticResource colorForeground}"/>
                 <Setter Property="FontFamily" Value="Segoe UI Variable"/>
                 <Setter Property="FontSize" Value="12.5"/>
                 <Setter Property="FontWeight" Value="SemiBold"/>
             </Style>
             
             <Style TargetType="FontIcon">
-                <Setter Property="Foreground" Value="#9EA0A2"/>
+                <Setter Property="Foreground" Value="{StaticResource colorIconForeground}"/>
                 <Setter Property="FontSize" Value="14.5"/>
                 <Setter Property="FontWeight" Value="Light"/>
+                <Setter Property="FontFamily" Value="Segoe Fluent Icons"/>
             </Style>
         </ResourceDictionary>
     </Application.Resources>

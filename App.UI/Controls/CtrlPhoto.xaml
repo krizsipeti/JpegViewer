@@ -8,7 +8,7 @@
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     mc:Ignorable="d">
 
-    <Grid x:Name="root" Background="#1E1F23">
+    <Grid x:Name="root" Background="{StaticResource colorBackground}">
         <Image x:Name="photoImage" Stretch="Uniform" Source="{Binding CurrentBitmap}"/>
     </Grid>
 </UserControl>

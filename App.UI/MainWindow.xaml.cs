@@ -1,8 +1,12 @@
 using JpegViewer.App.UI.Support;
 using JpegViewer.App.Vmd;
+using Microsoft.UI;
+using Microsoft.UI.Windowing;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Controls.Primitives;
+using Microsoft.UI.Xaml.Media;
+using Windows.UI;
 
 namespace JpegViewer.App.UI
 {
@@ -22,6 +26,20 @@ namespace JpegViewer.App.UI
         public MainWindow()
         {
             InitializeComponent();
+
+            // Hide system title bar.
+            ExtendsContentIntoTitleBar = true;
+
+            // Change some color of the titlebar
+            if (AppWindowTitleBar.IsCustomizationSupported())
+            {
+                ResourceDictionary res = Application.Current.Resources;
+                AppWindow.TitleBar.ButtonBackgroundColor = Colors.Transparent;
+                Color? colorButtonHoverBackground = (res["colorButtonHover"] as SolidColorBrush)?.Color;
+                AppWindow.TitleBar.ButtonHoverBackgroundColor = colorButtonHoverBackground;
+                Color? colorButtonForeground = (res["colorIconForeground"] as SolidColorBrush)?.Color;
+                AppWindow.TitleBar.ButtonForegroundColor = colorButtonForeground;
+            }
 
             // Set the root element's DataContext to the viewmodel of the MainWindow
             root.DataContext = App.GetService<VmdMainWindow>();

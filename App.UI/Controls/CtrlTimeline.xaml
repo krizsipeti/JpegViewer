@@ -18,20 +18,10 @@
         <Style TargetType="TextBlock" x:Name="TimelineTextStyle">
             <Setter Property="Margin" Value="0 4 0 4"/>
             <Setter Property="HorizontalTextAlignment" Value="Center"/>
-            <Setter Property="Foreground" Value="#9EA0A2"/>
+            <Setter Property="Foreground" Value="{StaticResource colorIconForeground}"/>
             <Setter Property="FontFamily" Value="Segoe UI Variable"/>
             <Setter Property="FontSize" Value="13.5"/>
             <Setter Property="FontWeight" Value="SemiBold"/>
-        </Style>
-        
-        <Style TargetType="FontIcon" x:Name="TimelineFontIconStyle">
-            <Setter Property="FontFamily" Value="Segoe Fluent Icons"/>
-            <Setter Property="FontSize" Value="32"/>
-            <Setter Property="Foreground" Value="#9EA0A2"/>
-        </Style>
-
-        <Style x:Name="PlayControlFontIconStyle" TargetType="FontIcon" BasedOn="{StaticResource TimelineFontIconStyle}">
-            <Setter Property="FontSize" Value="40"/>
         </Style>
 
         <StackLayout x:Key="HorizontalStackLayout" Orientation="Horizontal"/>
@@ -41,7 +31,7 @@
                   PointerMoved="Item_PointerMoved"
                   PointerReleased="Item_PointerReleased"
                   PointerCanceled="Item_PointerCanceled"
-                  Background="#202124">
+                  Background="{StaticResource colorTimelineItemBackground}">
                 <Grid.RowDefinitions>
                     <RowDefinition Height="Auto"/>
                     <RowDefinition Height="*"/>
@@ -51,7 +41,7 @@
                            HorizontalAlignment="Left"
                            Text="{x:Bind support:StringFormatter.TimelineItemHeaderText(ItemType, ItemKey)}"
                            Style="{StaticResource TimelineTextStyle}"/>
-                <Border BorderThickness="2" BorderBrush="#26272B" VerticalAlignment="Bottom"/>
+                <Border BorderThickness="2" BorderBrush="{StaticResource colorTimelineItemBorder}" VerticalAlignment="Bottom"/>
 
                 <ItemsRepeater x:Name="innerItemsRepeater" Grid.Row="1" ItemsSource="{x:Bind Units}" Layout="{StaticResource HorizontalStackLayout}">
                     <ItemsRepeater.ItemTemplate>
@@ -65,27 +55,27 @@
                                 </Grid.RowDefinitions>
                                 <TextBlock Text="{x:Bind support:StringFormatter.TimeLineItemUnitText(Type, Value)}" Style="{StaticResource TimelineTextStyle}"/>
                                 <FontIcon Grid.Row="1"
-                                          Visibility="{x:Bind support:XamlBindHelpers.CountToVisibility(Images)}"
-                                          Style="{StaticResource TimelineFontIconStyle}"
-                                          Glyph="{x:Bind support:XamlBindHelpers.GetPictureIconBasedOnCount(Images)}"/>
+                                          FontSize="32"
+                                          Glyph="{x:Bind support:XamlBindHelpers.GetPictureIconBasedOnCount(Images)}"
+                                          Visibility="{x:Bind support:XamlBindHelpers.CountToVisibility(Images)}"/>
                             </Grid>
                         </DataTemplate>
                     </ItemsRepeater.ItemTemplate>
                 </ItemsRepeater>
-                <Border Grid.RowSpan="3" BorderThickness="1" BorderBrush="#26272B" HorizontalAlignment="Left"/>
+                <Border Grid.RowSpan="3" BorderThickness="1" BorderBrush="{StaticResource colorTimelineItemBorder}" HorizontalAlignment="Left"/>
             </Grid>
         </DataTemplate>
     </UserControl.Resources>
 
-    <Grid x:Name="root" Background="#2C2E2F">
+    <Grid x:Name="root" Background="{StaticResource colorControlBackground}">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="*"/>
             <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
 
-        <TextBlock Margin="16 0 0 8" Text="Timeline view of pictures" FontSize="16" HorizontalAlignment="Left" Foreground="#F2F3F3"/>
-        <TextBlock Margin="0 4 0 8" HorizontalAlignment="Center" Text="{Binding CurrentPosition}" Foreground="#9EA0A2"/>
+        <TextBlock Margin="16 0 0 8" Text="Timeline view of pictures" FontSize="16" HorizontalAlignment="Left" Foreground="{StaticResource colorForeground}"/>
+        <TextBlock Margin="0 4 0 8" HorizontalAlignment="Center" Text="{Binding CurrentPosition}" Foreground="{StaticResource colorIconForeground}"/>
         <Border BorderThickness="1" VerticalAlignment="Bottom"/>
         
         <ScrollViewer x:Name="scrollViewer" Grid.Row="1"
@@ -101,26 +91,24 @@
                            PointerWheelChanged="ItemsRepeater_PointerWheelChanged"/>
         </ScrollViewer>        
         <Border Grid.Row="1" HorizontalAlignment="Center" BorderThickness="1" PointerWheelChanged="ItemsRepeater_PointerWheelChanged"/>
-        <Rectangle Grid.Row="2" Fill="#2C2E2F"/>
+        <Rectangle Grid.Row="2" Fill="{StaticResource colorControlBackground}"/>
         <Border Grid.Row="2" VerticalAlignment="Top" BorderThickness="1"/>
         <StackPanel Grid.Row="2" Margin="0 9 0 8" Orientation="Horizontal" HorizontalAlignment="Center">
-            <FontIcon Style="{StaticResource PlayControlFontIconStyle}"
+            <FontIcon FontSize="40"
                       Glyph="&#xf08d;"
-                      ToolTipService.ToolTip="Previous"
                       PointerEntered="FontIcon_PointerEntered"
                       PointerExited="FontIcon_PointerExited"
                       PointerPressed="FontIcon_PointerPressed"
                       PointerReleased="FontIcon_PointerReleased"/>
             <FontIcon Margin="16 0 16 0"
-                      Style="{StaticResource PlayControlFontIconStyle}"
-                      Glyph="&#xe786;" ToolTipService.ToolTip="Slideshow"                      
+                      FontSize="40"
+                      Glyph="&#xe786;"
                       PointerEntered="FontIcon_PointerEntered"
                       PointerExited="FontIcon_PointerExited"
                       PointerPressed="FontIcon_PointerPressed"
                       PointerReleased="FontIcon_PointerReleased"/>
-            <FontIcon Style="{StaticResource PlayControlFontIconStyle}"
+            <FontIcon FontSize="40"
                       Glyph="&#xf08f;"
-                      ToolTipService.ToolTip="Next"
                       PointerEntered="FontIcon_PointerEntered"
                       PointerExited="FontIcon_PointerExited"
                       PointerPressed="FontIcon_PointerPressed"

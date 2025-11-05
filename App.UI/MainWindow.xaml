@@ -15,8 +15,9 @@
         <MicaBackdrop />
     </Window.SystemBackdrop>
 
-    <Grid x:Name="root">
+    <Grid x:Name="root" Background="{StaticResource colorBackground}">
         <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
             <RowDefinition Height="40"/>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="*"/>
@@ -26,12 +27,28 @@
         </Grid.RowDefinitions>
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="Auto"/>
-            <ColumnDefinition Width="Auto"/>
             <ColumnDefinition Width="*"/>
         </Grid.ColumnDefinitions>
+        
+        <!-- Title bar -->
+        <Grid x:Name="AppTitleBar" Grid.ColumnSpan="2" Height="32" Background="{StaticResource colorControlBackground}">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition x:Name="LeftPaddingColumn" Width="0"/>
+                <ColumnDefinition/>
+                <ColumnDefinition x:Name="RightPaddingColumn" Width="0"/>
+            </Grid.ColumnDefinitions>
+            <Image x:Name="TitleBarIcon"
+                   Grid.Column="1"
+                   HorizontalAlignment="Left"
+                   Width="16"
+                   Height="16"
+                   Margin="8 2 0 0"
+                   Source="/Assets/AppLogo.ico"/>
+            <TextBlock x:Name="TitleBarTextBlock" Grid.Column="1" Margin="28 0 0 0" VerticalAlignment="Center" Text="JpegViewer"/>
+        </Grid>
 
         <!-- Command bar -->
-        <Grid Grid.ColumnSpan="3" Background="#2C2E2F">
+        <Grid Grid.Row="1" Grid.ColumnSpan="2">
             <StackPanel x:Name="OpenFolderButton"
                         Margin="8 4 0 4"
                         Orientation="Horizontal"
@@ -47,7 +64,7 @@
                 <TextBlock Margin="0 0 4 0" VerticalAlignment="Center" Text="Open folder" FontSize="14"/>
                 <i:Interaction.Behaviors>
                     <i:EventTriggerBehavior EventName="PointerEntered">
-                        <i:ChangePropertyAction TargetObject="{Binding ElementName=OpenFolderButton}" PropertyName="Background" Value="#3D3D3D"/>
+                        <i:ChangePropertyAction TargetObject="{Binding ElementName=OpenFolderButton}" PropertyName="Background" Value="{StaticResource colorButtonHover}"/>
                     </i:EventTriggerBehavior>
                     <i:EventTriggerBehavior EventName="PointerExited">
                         <i:ChangePropertyAction TargetObject="{Binding ElementName=OpenFolderButton}" PropertyName="Background" Value="Transparent"/>
@@ -71,7 +88,7 @@
                           FontSize="24"/>
                 <i:Interaction.Behaviors>
                     <i:EventTriggerBehavior EventName="PointerEntered">
-                        <i:ChangePropertyAction TargetObject="{Binding ElementName=MenuButton}" PropertyName="Background" Value="#3D3D3D"/>
+                        <i:ChangePropertyAction TargetObject="{Binding ElementName=MenuButton}" PropertyName="Background" Value="{StaticResource colorButtonHover}"/>
                     </i:EventTriggerBehavior>
                     <i:EventTriggerBehavior EventName="PointerExited">
                         <i:ChangePropertyAction TargetObject="{Binding ElementName=MenuButton}" PropertyName="Background" Value="Transparent"/>
@@ -94,13 +111,12 @@
             </StackPanel>
         </Grid>
         
-        <Border Grid.Row="1" Grid.ColumnSpan="3"/>
-        <Border Grid.Row="2" Grid.Column="1"/>
-        <control:CtrlFolderPicker x:Name="folderPicker" Grid.Row="2"/>
-        <control:CtrlPhoto x:Name="photoViewer" Grid.Row="2" Grid.Column="2"/>
-        <Border Grid.Row="3" Grid.ColumnSpan="3"/>
-        <control:CtrlTimeline x:Name="timeline" Grid.Row="4" Grid.ColumnSpan="3"/>
-        <Rectangle Grid.Row="5" Grid.ColumnSpan="3" Fill="#313131"/>
-        <Border Grid.Row="5" Grid.ColumnSpan="3" BorderThickness="1" VerticalAlignment="Top"/>
+        <Border Grid.Row="2" Grid.ColumnSpan="2"/>
+        <control:CtrlFolderPicker x:Name="folderPicker" Grid.Row="3"/>
+        <control:CtrlPhoto x:Name="photoViewer" Grid.Row="3" Grid.Column="1"/>
+        <Border Grid.Row="4" Grid.ColumnSpan="2"/>
+        <control:CtrlTimeline x:Name="timeline" Grid.Row="5" Grid.ColumnSpan="2"/>
+        <Rectangle Grid.Row="6" Grid.ColumnSpan="2" Fill="{StaticResource colorStatusBarBackground}"/>
+        <Border Grid.Row="6" Grid.ColumnSpan="2" BorderThickness="1" VerticalAlignment="Top"/>
     </Grid>
 </Window>
