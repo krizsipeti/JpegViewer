@@ -10,7 +10,6 @@ using JpegViewer.App.Core.Types;
 using MetadataExtractor;
 using MetadataExtractor.Formats.Exif;
 using Microsoft.UI.Xaml.Media.Imaging;
-using Microsoft.UI.Xaml.Shapes;
 using Windows.Storage;
 using Windows.Storage.Streams;
 

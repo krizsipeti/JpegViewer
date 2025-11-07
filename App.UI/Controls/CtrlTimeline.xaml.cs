@@ -70,88 +70,7 @@ namespace JpegViewer.App.UI.Controls
             // Zoom in/out if Ctrl is pressed, otherwise scroll horizontally
             if (e.KeyModifiers == VirtualKeyModifiers.Control)
             {
-                double zoomStep = ViewModel.ZoomStep; // adjust sensitivity
-                double change = (delta > 0) ? zoomStep : -zoomStep;
-                if (ViewModel.ItemsWidth + change > ViewModel.MaxItemsWidth)
-                {
-                    if (ViewModel.ZoomLevel == ETimelineZoomLevel.Years)
-                    {
-                        ViewModel.JumpRequest.JumpTo = ViewModel.CurrentPosition;
-                        ViewModel.ItemsWidth = ViewModel.MinItemsWidth;                        
-                        ViewModel.ZoomLevel = ETimelineZoomLevel.Months;
-                        ViewModel.JumpRequest.Active = true;
-                    }
-                    else if (ViewModel.ZoomLevel == ETimelineZoomLevel.Months)
-                    {
-                        ViewModel.JumpRequest.JumpTo = ViewModel.CurrentPosition;
-                        ViewModel.ItemsWidth = ViewModel.MinItemsWidth;
-                        ViewModel.ZoomLevel = ETimelineZoomLevel.Days;
-                        ViewModel.JumpRequest.Active = true;
-                    }
-                    else if (ViewModel.ZoomLevel == ETimelineZoomLevel.Days)
-                    {
-                        ViewModel.JumpRequest.JumpTo = ViewModel.CurrentPosition;
-                        ViewModel.ItemsWidth = ViewModel.MinItemsWidth;
-                        ViewModel.ZoomLevel = ETimelineZoomLevel.Hours;
-                        ViewModel.JumpRequest.Active = true;
-                    }
-                    else if (ViewModel.ZoomLevel == ETimelineZoomLevel.Hours)
-                    {
-                        ViewModel.JumpRequest.JumpTo = ViewModel.CurrentPosition;
-                        ViewModel.ItemsWidth = ViewModel.MinItemsWidth;
-                        ViewModel.ZoomLevel = ETimelineZoomLevel.Minutes;
-                        ViewModel.JumpRequest.Active = true;
-                    }
-                    else if (ViewModel.ZoomLevel == ETimelineZoomLevel.Minutes)
-                    {
-                        ViewModel.JumpRequest.JumpTo = ViewModel.CurrentPosition;
-                        ViewModel.ItemsWidth = ViewModel.MinItemsWidth;
-                        ViewModel.ZoomLevel = ETimelineZoomLevel.Seconds;
-                        ViewModel.JumpRequest.Active = true;
-                    }
-                }
-                else if (ViewModel.ItemsWidth + change < ViewModel.MinItemsWidth)
-                {
-                    if (ViewModel.ZoomLevel == ETimelineZoomLevel.Months)
-                    {
-                        ViewModel.JumpRequest.JumpTo = ViewModel.CurrentPosition;
-                        ViewModel.ItemsWidth = ViewModel.MaxItemsWidth;
-                        ViewModel.ZoomLevel = ETimelineZoomLevel.Years;
-                        ViewModel.JumpRequest.Active = true;
-                    }
-                    else if (ViewModel.ZoomLevel == ETimelineZoomLevel.Days)
-                    {
-                        ViewModel.JumpRequest.JumpTo = ViewModel.CurrentPosition;
-                        ViewModel.ItemsWidth = ViewModel.MaxItemsWidth;
-                        ViewModel.ZoomLevel = ETimelineZoomLevel.Months;
-                        ViewModel.JumpRequest.Active = true;
-                    }
-                    else if (ViewModel.ZoomLevel == ETimelineZoomLevel.Hours)
-                    {
-                        ViewModel.JumpRequest.JumpTo = ViewModel.CurrentPosition;
-                        ViewModel.ItemsWidth = ViewModel.MaxItemsWidth;
-                        ViewModel.ZoomLevel = ETimelineZoomLevel.Days;
-                        ViewModel.JumpRequest.Active = true;
-                    }
-                    else if (ViewModel.ZoomLevel == ETimelineZoomLevel.Minutes)
-                    {
-                        ViewModel.JumpRequest.JumpTo = ViewModel.CurrentPosition;
-                        ViewModel.ItemsWidth = ViewModel.MaxItemsWidth;
-                        ViewModel.ZoomLevel = ETimelineZoomLevel.Hours;
-                        ViewModel.JumpRequest.Active = true;
-                    }
-                    else if (ViewModel.ZoomLevel == ETimelineZoomLevel.Seconds)
-                    {
-                        ViewModel.JumpRequest.JumpTo = ViewModel.CurrentPosition;
-                        ViewModel.ItemsWidth = ViewModel.MaxItemsWidth;
-                        ViewModel.ZoomLevel = ETimelineZoomLevel.Minutes;
-                        ViewModel.JumpRequest.Active = true;
-                    }
-                }
-                else
-                {
-                    ViewModel.ItemsWidth += change;
-                }
+                ViewModel.ZoomInZoomOut(delta);
             }
             else
             {
@@ -421,7 +340,7 @@ namespace JpegViewer.App.UI.Controls
         /// <param name="args"></param>
         private void scrollViewer_AnchorRequested(ScrollViewer sender, AnchorRequestedEventArgs args)
         {
-            if (ViewModel.JumpRequest.Active)
+            if (ViewModel.JumpRequest.Active || IsDragging)
             {
                 return;
             }

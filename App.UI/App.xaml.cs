@@ -37,6 +37,7 @@ namespace JpegViewer.App.UI
             services.AddSingleton<VmdCtrlTimeline>();
             services.AddSingleton<IDispatcherService, DispatcherService>();
             services.AddSingleton<IImageService, ImageService>();
+            services.AddSingleton<ITimelineService, TimelineService>();
             Services = services.BuildServiceProvider();
         }
 
