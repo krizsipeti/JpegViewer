@@ -27,18 +27,18 @@ namespace JpegViewer.App.Vmd.Controls
         private IImageService ImageService { get; }
 
         /// <summary>
+        /// Holds a DateTime to jump on timeline full (re)initialization or changing among zoom levels.
+        /// On application startup we jump to current DateTime by default.
+        /// </summary>
+        public JumpRequest JumpRequest { get; } = new JumpRequest(true, DateTime.Now);
+
+        /// <summary>
         /// The current position of the timeline control.
         /// </summary>
         public DateTime CurrentPosition
         {
             get => _currentPosition;
             set => SetProperty(ref _currentPosition, value);
-            //{
-            //    if (SetProperty(ref _currentPosition, value))
-            //    {
-            //        Task.Run(() => RefreshTimeLineItems());
-            //    }
-            //}
         }
 
         /// <summary>

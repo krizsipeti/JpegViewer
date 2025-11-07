@@ -1,6 +1,8 @@
 using System;
 using System.Collections.ObjectModel;
+using System.Linq;
 using CommunityToolkit.Mvvm.Messaging;
+using JpegViewer.App.Core;
 using JpegViewer.App.Core.Models;
 using JpegViewer.App.Core.Types;
 using JpegViewer.App.UI.Support;
@@ -39,6 +41,11 @@ namespace JpegViewer.App.UI.Controls
         private double StartPointerX { get; set; }
 
         /// <summary>
+        /// Holds the timeline control's viewmodel instance.
+        /// </summary>
+        private VmdCtrlTimeline ViewModel { get; } = App.GetService<VmdCtrlTimeline>();
+
+        /// <summary>
         /// Initializes a new instance of the <see cref="CtrlTimeline"/> class.
         /// </summary>
         public CtrlTimeline()
@@ -46,7 +53,7 @@ namespace JpegViewer.App.UI.Controls
             InitializeComponent();
 
             // Set the DataContext to the viewmodel of the Timeline control
-            DataContext = App.GetService<VmdCtrlTimeline>();
+            DataContext = ViewModel;
 
             // Register this instance to receive messages
             WeakReferenceMessenger.Default.Register<TimelineCurrentPositionChange>(this);
@@ -63,73 +70,87 @@ namespace JpegViewer.App.UI.Controls
             // Zoom in/out if Ctrl is pressed, otherwise scroll horizontally
             if (e.KeyModifiers == VirtualKeyModifiers.Control)
             {
-                VmdCtrlTimeline vmdCtrlTimeline = (VmdCtrlTimeline)DataContext;
-                if (vmdCtrlTimeline == null)
-                {
-                    return;
-                }
-
-                double zoomStep = vmdCtrlTimeline.ZoomStep; // adjust sensitivity
+                double zoomStep = ViewModel.ZoomStep; // adjust sensitivity
                 double change = (delta > 0) ? zoomStep : -zoomStep;
-                if (vmdCtrlTimeline.ItemsWidth + change > vmdCtrlTimeline.MaxItemsWidth)
+                if (ViewModel.ItemsWidth + change > ViewModel.MaxItemsWidth)
                 {
-                    if (vmdCtrlTimeline.ZoomLevel == ETimelineZoomLevel.Years)
+                    if (ViewModel.ZoomLevel == ETimelineZoomLevel.Years)
                     {
-                        vmdCtrlTimeline.ItemsWidth = vmdCtrlTimeline.MinItemsWidth;
-                        vmdCtrlTimeline.ZoomLevel = ETimelineZoomLevel.Months;
+                        ViewModel.JumpRequest.JumpTo = ViewModel.CurrentPosition;
+                        ViewModel.ItemsWidth = ViewModel.MinItemsWidth;                        
+                        ViewModel.ZoomLevel = ETimelineZoomLevel.Months;
+                        ViewModel.JumpRequest.Active = true;
                     }
-                    else if (vmdCtrlTimeline.ZoomLevel == ETimelineZoomLevel.Months)
+                    else if (ViewModel.ZoomLevel == ETimelineZoomLevel.Months)
                     {
-                        vmdCtrlTimeline.ItemsWidth = vmdCtrlTimeline.MinItemsWidth;
-                        vmdCtrlTimeline.ZoomLevel = ETimelineZoomLevel.Days;
+                        ViewModel.JumpRequest.JumpTo = ViewModel.CurrentPosition;
+                        ViewModel.ItemsWidth = ViewModel.MinItemsWidth;
+                        ViewModel.ZoomLevel = ETimelineZoomLevel.Days;
+                        ViewModel.JumpRequest.Active = true;
                     }
-                    else if (vmdCtrlTimeline.ZoomLevel == ETimelineZoomLevel.Days)
+                    else if (ViewModel.ZoomLevel == ETimelineZoomLevel.Days)
                     {
-                        vmdCtrlTimeline.ItemsWidth = vmdCtrlTimeline.MinItemsWidth;
-                        vmdCtrlTimeline.ZoomLevel = ETimelineZoomLevel.Hours;
+                        ViewModel.JumpRequest.JumpTo = ViewModel.CurrentPosition;
+                        ViewModel.ItemsWidth = ViewModel.MinItemsWidth;
+                        ViewModel.ZoomLevel = ETimelineZoomLevel.Hours;
+                        ViewModel.JumpRequest.Active = true;
                     }
-                    else if (vmdCtrlTimeline.ZoomLevel == ETimelineZoomLevel.Hours)
+                    else if (ViewModel.ZoomLevel == ETimelineZoomLevel.Hours)
                     {
-                        vmdCtrlTimeline.ItemsWidth = vmdCtrlTimeline.MinItemsWidth;
-                        vmdCtrlTimeline.ZoomLevel = ETimelineZoomLevel.Minutes;
+                        ViewModel.JumpRequest.JumpTo = ViewModel.CurrentPosition;
+                        ViewModel.ItemsWidth = ViewModel.MinItemsWidth;
+                        ViewModel.ZoomLevel = ETimelineZoomLevel.Minutes;
+                        ViewModel.JumpRequest.Active = true;
                     }
-                    else if (vmdCtrlTimeline.ZoomLevel == ETimelineZoomLevel.Minutes)
+                    else if (ViewModel.ZoomLevel == ETimelineZoomLevel.Minutes)
                     {
-                        vmdCtrlTimeline.ItemsWidth = vmdCtrlTimeline.MinItemsWidth;
-                        vmdCtrlTimeline.ZoomLevel = ETimelineZoomLevel.Seconds;
+                        ViewModel.JumpRequest.JumpTo = ViewModel.CurrentPosition;
+                        ViewModel.ItemsWidth = ViewModel.MinItemsWidth;
+                        ViewModel.ZoomLevel = ETimelineZoomLevel.Seconds;
+                        ViewModel.JumpRequest.Active = true;
                     }
                 }
-                else if (vmdCtrlTimeline.ItemsWidth + change < vmdCtrlTimeline.MinItemsWidth)
+                else if (ViewModel.ItemsWidth + change < ViewModel.MinItemsWidth)
                 {
-                    if (vmdCtrlTimeline.ZoomLevel == ETimelineZoomLevel.Months)
+                    if (ViewModel.ZoomLevel == ETimelineZoomLevel.Months)
                     {
-                        vmdCtrlTimeline.ItemsWidth = vmdCtrlTimeline.MaxItemsWidth;
-                        vmdCtrlTimeline.ZoomLevel = ETimelineZoomLevel.Years;
+                        ViewModel.JumpRequest.JumpTo = ViewModel.CurrentPosition;
+                        ViewModel.ItemsWidth = ViewModel.MaxItemsWidth;
+                        ViewModel.ZoomLevel = ETimelineZoomLevel.Years;
+                        ViewModel.JumpRequest.Active = true;
                     }
-                    else if (vmdCtrlTimeline.ZoomLevel == ETimelineZoomLevel.Days)
+                    else if (ViewModel.ZoomLevel == ETimelineZoomLevel.Days)
                     {
-                        vmdCtrlTimeline.ItemsWidth = vmdCtrlTimeline.MaxItemsWidth;
-                        vmdCtrlTimeline.ZoomLevel = ETimelineZoomLevel.Months;
+                        ViewModel.JumpRequest.JumpTo = ViewModel.CurrentPosition;
+                        ViewModel.ItemsWidth = ViewModel.MaxItemsWidth;
+                        ViewModel.ZoomLevel = ETimelineZoomLevel.Months;
+                        ViewModel.JumpRequest.Active = true;
                     }
-                    else if (vmdCtrlTimeline.ZoomLevel == ETimelineZoomLevel.Hours)
+                    else if (ViewModel.ZoomLevel == ETimelineZoomLevel.Hours)
                     {
-                        vmdCtrlTimeline.ItemsWidth = vmdCtrlTimeline.MaxItemsWidth;
-                        vmdCtrlTimeline.ZoomLevel = ETimelineZoomLevel.Days;
+                        ViewModel.JumpRequest.JumpTo = ViewModel.CurrentPosition;
+                        ViewModel.ItemsWidth = ViewModel.MaxItemsWidth;
+                        ViewModel.ZoomLevel = ETimelineZoomLevel.Days;
+                        ViewModel.JumpRequest.Active = true;
                     }
-                    else if (vmdCtrlTimeline.ZoomLevel == ETimelineZoomLevel.Minutes)
+                    else if (ViewModel.ZoomLevel == ETimelineZoomLevel.Minutes)
                     {
-                        vmdCtrlTimeline.ItemsWidth = vmdCtrlTimeline.MaxItemsWidth;
-                        vmdCtrlTimeline.ZoomLevel = ETimelineZoomLevel.Hours;
+                        ViewModel.JumpRequest.JumpTo = ViewModel.CurrentPosition;
+                        ViewModel.ItemsWidth = ViewModel.MaxItemsWidth;
+                        ViewModel.ZoomLevel = ETimelineZoomLevel.Hours;
+                        ViewModel.JumpRequest.Active = true;
                     }
-                    else if (vmdCtrlTimeline.ZoomLevel == ETimelineZoomLevel.Seconds)
+                    else if (ViewModel.ZoomLevel == ETimelineZoomLevel.Seconds)
                     {
-                        vmdCtrlTimeline.ItemsWidth = vmdCtrlTimeline.MaxItemsWidth;
-                        vmdCtrlTimeline.ZoomLevel = ETimelineZoomLevel.Minutes;
+                        ViewModel.JumpRequest.JumpTo = ViewModel.CurrentPosition;
+                        ViewModel.ItemsWidth = ViewModel.MaxItemsWidth;
+                        ViewModel.ZoomLevel = ETimelineZoomLevel.Minutes;
+                        ViewModel.JumpRequest.Active = true;
                     }
                 }
                 else
                 {
-                    vmdCtrlTimeline.ItemsWidth += change;
+                    ViewModel.ItemsWidth += change;
                 }
             }
             else
@@ -229,14 +250,6 @@ namespace JpegViewer.App.UI.Controls
         /// <exception cref="NotImplementedException"></exception>
         public void Receive(TimelineCurrentPositionChange message)
         {
-            //VmdCtrlTimeline? vmd = DataContext as VmdCtrlTimeline;
-            //if (vmd == null)
-            //{
-            //    return;
-            //}
-
-            //var offset = (message.NewPosition - vmd.StartPosition).TotalMicroseconds / vmd.CurrentLenght.TotalMicroseconds * scrollViewer.ExtentWidth;
-            //scrollViewer.ChangeView(1000d/*offset*/, null, null, false);
         }
 
         /// <summary>
@@ -245,12 +258,6 @@ namespace JpegViewer.App.UI.Controls
         /// </summary>
         private void SetCurrentPosition()
         {
-            VmdCtrlTimeline? vmd = DataContext as VmdCtrlTimeline;
-            if (vmd == null)
-            {
-                return;
-            }
-
             // Transform our ScrollViewers visible center point to ItemsRepeater center point
             var center = new Point(scrollViewer.ViewportWidth / 2, scrollViewer.ViewportHeight / 2);
             var pt = scrollViewer.TransformToVisual(itemsRepeater).TransformPoint(center);
@@ -283,8 +290,159 @@ namespace JpegViewer.App.UI.Controls
                     {
                         double microsPerPixel = item.Duration.TotalMicroseconds / grid.ActualWidth;
                         double currentOffset = pt.X - grid.ActualOffset.X;
-                        vmd.CurrentPosition = item.ItemKey.AddMicroseconds(microsPerPixel * currentOffset);
+                        ViewModel.CurrentPosition = item.ItemKey.AddMicroseconds(microsPerPixel * currentOffset);
                     }
+                }
+            }
+        }
+
+        /// <summary>
+        /// Handle element prepared event of base units to do scrolling.
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="args"></param>
+        private void itemsRepeater_ElementPrepared(ItemsRepeater sender, ItemsRepeaterElementPreparedEventArgs args)
+        {
+            if (ViewModel.JumpRequest.Active)
+            {
+                Grid? baseGrid = args.Element as Grid;
+                if (baseGrid == null) return;
+
+                TimelineItemBaseUnit? baseUnit = baseGrid.Tag as TimelineItemBaseUnit;
+                if (baseUnit == null) return;
+
+                Grid? parentGrid = (baseGrid.Parent as ItemsRepeater)?.Parent as Grid;
+                if (parentGrid == null) return;
+                
+                TimelineItem? parentUnit = parentGrid.Tag as TimelineItem;
+                if (parentUnit == null) return;
+
+                int indexOfBaseUnit = parentUnit.Units.IndexOf(baseUnit);
+                double actualOffset = parentGrid.ActualOffset.X + (baseGrid.ActualWidth * (double)indexOfBaseUnit);
+                double halfViewPort = scrollViewer.ViewportWidth / 2;
+                
+                // Calculate additional offset based on unit type
+                bool bScrollingDone = false;
+                switch (baseUnit.Type)
+                {
+                    case ETimelineBaseUnitType.Year:
+                    {
+                        if (baseUnit.Value == ViewModel.JumpRequest.JumpTo.Year)
+                        {
+                            double diffMicro = (ViewModel.JumpRequest.JumpTo - parentUnit.ItemKey.AddYears(indexOfBaseUnit)).TotalMicroseconds;
+                            double yearMicro = TimeSpan.FromDays(DateTime.IsLeapYear(ViewModel.JumpRequest.JumpTo.Year) ? 366 : 365).TotalMicroseconds;
+                            double additionalOffset = baseGrid.ActualWidth / yearMicro * diffMicro;
+                            actualOffset += additionalOffset - halfViewPort;
+                            bScrollingDone = scrollViewer.ChangeView(actualOffset, null, null, true);
+                        }
+                        break;
+                    }
+                    case ETimelineBaseUnitType.Month:
+                    {
+                        if (CoreUtils.HasSameYear(parentUnit.ItemKey, ViewModel.JumpRequest.JumpTo) && baseUnit.Value == ViewModel.JumpRequest.JumpTo.Month)
+                        {
+                            double diffMicro = (ViewModel.JumpRequest.JumpTo - parentUnit.ItemKey.AddMonths(indexOfBaseUnit)).TotalMicroseconds;
+                            double monthMicro = TimeSpan.FromDays(DateTime.DaysInMonth(ViewModel.JumpRequest.JumpTo.Year, ViewModel.JumpRequest.JumpTo.Month)).TotalMicroseconds;
+                            double additionalOffset = baseGrid.ActualWidth / monthMicro * diffMicro;
+                            actualOffset += additionalOffset - halfViewPort;
+                            bScrollingDone = scrollViewer.ChangeView(actualOffset, null, null, true);
+                        }
+                        break;
+                    }
+                    case ETimelineBaseUnitType.Day:
+                    {
+                        if (CoreUtils.HasSameYearMonth(parentUnit.ItemKey, ViewModel.JumpRequest.JumpTo) && baseUnit.Value == ViewModel.JumpRequest.JumpTo.Day)
+                        {
+                            double diffMicro = (ViewModel.JumpRequest.JumpTo - parentUnit.ItemKey.AddDays(indexOfBaseUnit)).TotalMicroseconds;
+                            double dayMicro = TimeSpan.FromDays(1).TotalMicroseconds;
+                            double additionalOffset = baseGrid.ActualWidth / dayMicro * diffMicro;
+                            actualOffset += additionalOffset - halfViewPort;
+                            bScrollingDone = scrollViewer.ChangeView(actualOffset, null, null, true);
+                        }
+                        break;
+                    }
+                    case ETimelineBaseUnitType.Hour:
+                    {
+                        if (CoreUtils.HasSameYearMonthDay(parentUnit.ItemKey, ViewModel.JumpRequest.JumpTo) && baseUnit.Value == ViewModel.JumpRequest.JumpTo.Hour)
+                        {
+                            double diffMicro = (ViewModel.JumpRequest.JumpTo - parentUnit.ItemKey.AddHours(indexOfBaseUnit)).TotalMicroseconds;
+                            double hourMicro = TimeSpan.FromHours(1).TotalMicroseconds;
+                            double additionalOffset = baseGrid.ActualWidth / hourMicro * diffMicro;
+                            actualOffset += additionalOffset - halfViewPort;
+                            bScrollingDone = scrollViewer.ChangeView(actualOffset, null, null, true);
+                        }
+                        break;
+                    }
+                    case ETimelineBaseUnitType.Minute:
+                    {
+                        if (CoreUtils.HasSameYearMonthDayHour(parentUnit.ItemKey, ViewModel.JumpRequest.JumpTo) && baseUnit.Value == ViewModel.JumpRequest.JumpTo.Minute)
+                        {
+                            double diffMicro = (ViewModel.JumpRequest.JumpTo - parentUnit.ItemKey.AddMinutes(indexOfBaseUnit)).TotalMicroseconds;
+                            double minuteMicro = TimeSpan.FromMinutes(1).TotalMicroseconds;
+                            double additionalOffset = baseGrid.ActualWidth / minuteMicro * diffMicro;
+                            actualOffset += additionalOffset - halfViewPort;
+                            bScrollingDone = scrollViewer.ChangeView(actualOffset, null, null, true);
+                        }
+                        break;
+                    }
+                    case ETimelineBaseUnitType.Second:
+                    {
+                        if (CoreUtils.HasSameYearMonthDayHourMinute(parentUnit.ItemKey, ViewModel.JumpRequest.JumpTo) && baseUnit.Value == ViewModel.JumpRequest.JumpTo.Second)
+                        {
+                            double diffMicro = (ViewModel.JumpRequest.JumpTo - parentUnit.ItemKey.AddSeconds(indexOfBaseUnit)).TotalMicroseconds;
+                            double secondMicro = TimeSpan.FromSeconds(1).TotalMicroseconds;
+                            double additionalOffset = baseGrid.ActualWidth / secondMicro * diffMicro;
+                            actualOffset += additionalOffset - halfViewPort;
+                            bScrollingDone = scrollViewer.ChangeView(actualOffset, null, null, true);
+                        }
+                        break;
+                    }
+                    default:
+                        break;
+                }
+
+                if (bScrollingDone)
+                {
+                    // We have found the element we wanted and scrolled to it
+                    ViewModel.JumpRequest.Active = false;
+                }
+                else if (actualOffset > scrollViewer.ViewportWidth)
+                {
+                    // Scroll toward the end to bring into our view the wanted element
+                    scrollViewer.ChangeView(actualOffset, null, null, true);
+                }
+            }
+        }
+
+        /// <summary>
+        /// Set the anchor for zooming to the center element of our scrollviewer that is under the hair line.
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="args"></param>
+        private void scrollViewer_AnchorRequested(ScrollViewer sender, AnchorRequestedEventArgs args)
+        {
+            if (ViewModel.JumpRequest.Active)
+            {
+                return;
+            }
+
+            // Transform our ScrollViewers visible center point to ItemsRepeater center point
+            var center = new Point(scrollViewer.ViewportWidth / 2, scrollViewer.ViewportHeight / 2);
+            var pt = scrollViewer.TransformToVisual(itemsRepeater).TransformPoint(center);
+
+            foreach (var element in args.AnchorCandidates.Where(e => (e as Grid)?.Tag is TimelineItemBaseUnit))
+            {
+                // Get element bounds in repeater coordinates
+                var transform = element.TransformToVisual(itemsRepeater);
+                var topLeft = transform.TransformPoint(new Point(0, 0));
+                var size = (element as FrameworkElement)?.RenderSize ?? new Size(0, 0);
+                var rect = new Rect(topLeft, size);
+
+                // Hitest the center point to the element rect
+                if (rect.Contains(pt))
+                {
+                    args.Anchor = element;
+                    return;
                 }
             }
         }

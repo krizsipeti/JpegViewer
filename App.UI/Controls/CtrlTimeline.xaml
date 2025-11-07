@@ -31,7 +31,8 @@
                   PointerMoved="Item_PointerMoved"
                   PointerReleased="Item_PointerReleased"
                   PointerCanceled="Item_PointerCanceled"
-                  Background="{StaticResource colorTimelineItemBackground}">
+                  Background="{StaticResource colorTimelineItemBackground}"
+                  Tag="{x:Bind}">
                 <Grid.RowDefinitions>
                     <RowDefinition Height="Auto"/>
                     <RowDefinition Height="*"/>
@@ -43,12 +44,14 @@
                            Style="{StaticResource TimelineTextStyle}"/>
                 <Border BorderThickness="2" BorderBrush="{StaticResource colorTimelineItemBorder}" VerticalAlignment="Bottom"/>
 
-                <ItemsRepeater x:Name="innerItemsRepeater" Grid.Row="1" ItemsSource="{x:Bind Units}" Layout="{StaticResource HorizontalStackLayout}">
+                <ItemsRepeater x:Name="innerItemsRepeater" Grid.Row="1" ItemsSource="{x:Bind Units}" Layout="{StaticResource HorizontalStackLayout}"
+                               ElementPrepared="itemsRepeater_ElementPrepared">
                     <ItemsRepeater.ItemTemplate>
                         <DataTemplate x:DataType="models:TimelineItemBaseUnit">
                             <Grid MinWidth="{Binding DataContext.MinItemsWidth, ElementName=itemsRepeater}"
                                   Width="{Binding DataContext.ItemsWidth, ElementName=itemsRepeater}"
-                                  Background="{x:Bind support:XamlBindHelpers.GetAlternationColor(support:XamlBindHelpers.ColorBrushA, support:XamlBindHelpers.ColorBrushB)}">
+                                  Background="{x:Bind support:XamlBindHelpers.GetAlternationColor(support:XamlBindHelpers.ColorBrushA, support:XamlBindHelpers.ColorBrushB)}"
+                                  Tag="{x:Bind}">
                                 <Grid.RowDefinitions>
                                     <RowDefinition Height="Auto"/>
                                     <RowDefinition Height="*"/>
@@ -83,11 +86,12 @@
                       VerticalScrollBarVisibility="Disabled"
                       IsVerticalScrollChainingEnabled="False"
                       ViewChanged="scrollViewer_ViewChanged"
-                      LayoutUpdated="scrollViewer_LayoutUpdated">
+                      LayoutUpdated="scrollViewer_LayoutUpdated"
+                      AnchorRequested="scrollViewer_AnchorRequested">
             <ItemsRepeater x:Name="itemsRepeater"
                            ItemsSource="{Binding Items}"
                            ItemTemplate="{StaticResource TimelineItemTemplate}"
-                           Layout="{StaticResource HorizontalStackLayout}"                           
+                           Layout="{StaticResource HorizontalStackLayout}"
                            PointerWheelChanged="ItemsRepeater_PointerWheelChanged"/>
         </ScrollViewer>        
         <Border Grid.Row="1" HorizontalAlignment="Center" BorderThickness="1" PointerWheelChanged="ItemsRepeater_PointerWheelChanged"/>

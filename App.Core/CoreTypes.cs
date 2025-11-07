@@ -1,8 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Collections.ObjectModel;
-using System.Collections.Specialized;
-using System.ComponentModel;
 using JpegViewer.App.Core.Models;
 
 namespace JpegViewer.App.Core.Types
@@ -69,6 +65,34 @@ namespace JpegViewer.App.Core.Types
         Hour,
         Minute,
         Second
+    }
+
+    /// <summary>
+    /// Small helper used in timeline for jump requests done
+    /// on full (re)initialization or when changing among zoom levels.
+    /// </summary>
+    public class JumpRequest
+    {
+        /// <summary>
+        /// If true, we did not done jumping yet, so it is active.
+        /// </summary>
+        public bool Active { get; set; }
+
+        /// <summary>
+        /// The DateTime we want to jump to in our timeline.
+        /// </summary>
+        public DateTime JumpTo { get; set; }
+
+        /// <summary>
+        /// Sets active and the jumpto properties always.
+        /// </summary>
+        /// <param name="active"></param>
+        /// <param name="jumpTo"></param>
+        public JumpRequest(bool active, DateTime jumpTo)
+        {
+            Active = active;
+            JumpTo = jumpTo;
+        }
     }
 
     /// <summary>
