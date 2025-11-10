@@ -2,6 +2,8 @@
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
+using System.Threading;
+using System.Threading.Tasks;
 using JpegViewer.App.Core.Interfaces;
 using JpegViewer.App.Core.Models;
 using JpegViewer.App.Core.Types;
@@ -15,7 +17,7 @@ namespace JpegViewer.App.Vmd.Controls
     public partial class VmdCtrlTimeline : VmdBase
     {
         private ObservableCollection<TimelineItem> _items = new ObservableCollection<TimelineItem>();
-        private DateTime _currentPosition;
+        private DateTime _currentTime;
         private double _itemsWidth;
         private ETimelineZoomLevel _zoomLevel = ETimelineZoomLevel.Seconds;
         private readonly object _itemsLock = new object();
@@ -31,29 +33,34 @@ namespace JpegViewer.App.Vmd.Controls
         private IImageService ImageService { get; }
 
         /// <summary>
+        /// Guard flag to prevent too much refresh actions on timeline items.
+        /// </summary>
+        public bool RefreshTimelineItemsRequestQueued { get; set; } = false;
+
+        /// <summary>
         /// Holds a DateTime to jump on timeline full (re)initialization or changing among zoom levels.
         /// On application startup we jump to current DateTime by default.
         /// </summary>
         public JumpRequest JumpRequest { get; } = new JumpRequest(true, DateTime.Now);
 
         /// <summary>
-        /// The current position of the timeline control.
+        /// The current time represented by the absolute center position of the timeline control.
         /// </summary>
-        public DateTime CurrentPosition
+        public DateTime CurrentTime
         {
-            get => _currentPosition;
-            set => SetProperty(ref _currentPosition, value);
+            get => _currentTime;
+            set => SetProperty(ref _currentTime, value);
         }
 
         /// <summary>
         /// Start date of the timeline.
         /// </summary>
-        public DateTime StartPosition { get => _items.Any() ? _items.First().ItemKey : DateTime.MinValue; }
+        public DateTime StartTime { get => _items.Any() ? _items.First().ItemKey : DateTime.MinValue; }
 
         /// <summary>
         /// End date of the timeline.
         /// </summary>
-        public DateTime EndPosition { get => _items.Any() ? _items.Last().EndTime : DateTime.MaxValue; }
+        public DateTime EndTime { get => _items.Any() ? _items.Last().EndTime : DateTime.MaxValue; }
 
         /// <summary>
         /// The current lenght of the timeline elements.
@@ -137,7 +144,7 @@ namespace JpegViewer.App.Vmd.Controls
 
             // Set further default startup values
             ItemsWidth = MinItemsWidth;
-            CurrentPosition = DateTime.Now;
+            CurrentTime = DateTime.Now;
             ZoomLevel = ETimelineZoomLevel.Years;
         }
 
@@ -154,7 +161,7 @@ namespace JpegViewer.App.Vmd.Controls
 
             double zoomStep = ZoomStep; // adjust sensitivity
             double change = (deltaMouseWheel > 0) ? zoomStep : -zoomStep;
-            JumpRequest.JumpTo = CurrentPosition;            
+            JumpRequest.JumpTo = CurrentTime;            
 
             if (ItemsWidth + change > MaxItemsWidth && ZoomLevel < ETimelineZoomLevel.Seconds)
             {
@@ -185,12 +192,34 @@ namespace JpegViewer.App.Vmd.Controls
         }
 
         /// <summary>
+        /// Puts a task to the UI dispatcher to refresh timeline items.
+        /// </summary>
+        public void ScheduleRefreshTimelineItems()
+        {
+            // Set our guard flag to prevent flood of refreshes
+            RefreshTimelineItemsRequestQueued = true;
+
+            // Fire-and-forget debounce task
+            Task.Run(() =>
+            {
+                // Enqueue to dispatcher — runs after current layout/measure/arrange
+                DispatcherService.Invoke(() =>
+                {
+                    RefreshTimelineItems();
+
+                    // Clear our guard flag to allow next refresh action
+                    RefreshTimelineItemsRequestQueued = false;
+                });
+            });
+        }
+
+        /// <summary>
         /// Changes and fills the timeline with new items according to the new zoom level.
         /// </summary>
         /// <param name="zoomLevel"></param>
         private void ChangeItemsToZoomLevel(ETimelineZoomLevel zoomLevel)
         {
-            List<TimelineItem>? itemsList = TimelineService.GetItemsForZoomLevel(zoomLevel, CurrentPosition);
+            List<TimelineItem>? itemsList = TimelineService.GetItemsForZoomLevel(zoomLevel, CurrentTime);
             if (itemsList != null)
             {
                 lock (_itemsLock)
@@ -207,105 +236,65 @@ namespace JpegViewer.App.Vmd.Controls
         /// <summary>
         /// Updates time line when scrolling toward the left or right end.
         /// </summary>
-        //private void RefreshTimeLineItems()
-        //{
-            //if (ImageService.MinDateTaken == null) return;
-            //lock (_itemsLock)
-            //{
-                //if (CurrentPosition - StartPosition < EndPosition - CurrentPosition)
-                //{
-                    //// We are closer to the start (left end) of our time line
-                    //// Check if there are images created before our current start position
-                    //if (/*(*/ImageService.MinDateTaken /*- (Items.First().Duration * 3))*/ < StartPosition)
-                    //{
-                        //int amountToAdd = (int)((CurrentPosition - StartPosition).TotalMicroseconds / Items.First().Duration.TotalMicroseconds);
-                        //if (amountToAdd <= 0)
-                        //{
-                            //return;
-                        //}
+        private void RefreshTimelineItems()
+        {
+            lock (_itemsLock)
+            {
+                // If zero elements or more than the expected maximum then return
+                if (Items.Count == 0 || Items.Count > 255)
+                {
+                    return;
+                }
+                
+                int index = 0;
+                for (; index < Items.Count; index++)
+                {
+                    if (Items[index].EndTime > CurrentTime)
+                    {
+                        break;
+                    }
+                }
 
-                        //List<TimelineItem>? itemsList = null;
-                        //switch (ZoomLevel)
-                        //{
-                            //case ETimelineZoomLevel.Years:
-                                //itemsList = GetItemsForYearZoom(StartPosition.AddYears(-(amountToAdd * 10)), StartPosition.AddYears(-10));
-                                //break;
-                            //case ETimelineZoomLevel.Months:
-                                //itemsList = GetItemsForMonthZoom(StartPosition.AddYears(-amountToAdd), StartPosition.AddYears(-1));
-                                //break;
-                            //case ETimelineZoomLevel.Days:
-                                //itemsList = GetItemsForDayZoom(StartPosition.AddMonths(-amountToAdd), StartPosition.AddMonths(-1));
-                                //break;
-                            //case ETimelineZoomLevel.Hours:
-                                //itemsList = GetItemsForHourZoom(StartPosition.AddDays(-amountToAdd), StartPosition.AddDays(-1));
-                                //break;
-                            //case ETimelineZoomLevel.Minutes:
-                                //itemsList = GetItemsForMinuteZoom(StartPosition.AddHours(-amountToAdd), StartPosition.AddHours(-1));
-                                //break;
-                            //case ETimelineZoomLevel.Seconds:
-                                //itemsList = GetItemsForSecondZoom(StartPosition.AddMinutes(-amountToAdd), StartPosition.AddMinutes(-1));
-                                //break;
-                        //}
+                int itemIndexDiffFromCenter = index - TimelineService.ItemBufferSize;
+                if (itemIndexDiffFromCenter == 0)
+                {
+                    // Current time belongs to center item. Nothing to do.
+                    return;
+                }
+                else if (itemIndexDiffFromCenter < 0)
+                {
+                    // Try to keep the timeline above the year of 1100
+                    if (Items.First().ItemKey.Year <= 1100)
+                    {
+                        return;
+                    }
 
-                        //if (itemsList == null) return;
-                        //DispatcherService.Invoke(() =>
-                        //{
-                            //for (int i = itemsList.Count - 1; i >= 0; i--)
-                            //{
-                                //Items.Insert(0, itemsList[i]);
-                                //Items.RemoveAt(Items.Count - 1);
-                            //}
-                        //});                        
-                    //}
-                //}
-                //else
-                //{
-                    //// We are closer to the end (right side) of our time line
-                    //// Check if there are images created after our current end position
-                    //if (/*(*/ImageService.MaxDateTaken/* + (Items.Last().Duration * 3))*/ > EndPosition)
-                    //{
-                        //int amountToAdd = (int)((EndPosition - CurrentPosition).TotalMicroseconds / Items.Last().Duration.TotalMicroseconds);
-                        //if (amountToAdd <= 0)
-                        //{
-                            //return;
-                        //}
+                    // We are closer to the start of our current timeline, so insert items to the beginning and remove from the end
+                    var items = TimelineService.GetItemsForZoomLevel(ZoomLevel, Items.First().ItemKey, (byte)Math.Abs(itemIndexDiffFromCenter), ETimelineGetOption.Pre);
+                    for (int i = items.Count - 1; i >= 0; i--)
+                    {
+                        Items.Insert(0, items[i]);
+                        Items.RemoveAt(Items.Count - 1);
+                    }
+                }
+                else
+                {
+                    // Try to keep the timeline under the year of 2100
+                    if (Items.Last().ItemKey.Year >= 2100)
+                    {
+                        return;
+                    }
 
-                        //List<TimelineItem>? itemsList = null;
-                        //switch (ZoomLevel)
-                        //{
-                            //case ETimelineZoomLevel.Years:
-                                //itemsList = GetItemsForYearZoom(EndPosition.AddYears(10), EndPosition.AddYears(amountToAdd * 10));
-                                //break;
-                            //case ETimelineZoomLevel.Months:
-                                //itemsList = GetItemsForMonthZoom(EndPosition.AddYears(1), StartPosition.AddYears(amountToAdd));
-                                //break;
-                            //case ETimelineZoomLevel.Days:
-                                //itemsList = GetItemsForDayZoom(EndPosition.AddMonths(1), StartPosition.AddMonths(amountToAdd));
-                                //break;
-                            //case ETimelineZoomLevel.Hours:
-                                //itemsList = GetItemsForHourZoom(EndPosition.AddDays(1), StartPosition.AddDays(amountToAdd));
-                                //break;
-                            //case ETimelineZoomLevel.Minutes:
-                                //itemsList = GetItemsForMinuteZoom(EndPosition.AddHours(1), StartPosition.AddHours(amountToAdd));
-                                //break;
-                            //case ETimelineZoomLevel.Seconds:
-                                //itemsList = GetItemsForSecondZoom(EndPosition.AddMinutes(1), StartPosition.AddMinutes(amountToAdd));
-                                //break;
-                        //}
-
-                        //if (itemsList == null) return;
-                        //DispatcherService.Invoke(() =>
-                        //{
-                            //for (int i = 0; i < itemsList.Count; i++)
-                            //{
-                                //Items.Insert(Items.Count(), itemsList[i]);
-                                //Items.RemoveAt(0);
-                            //}
-                        //});
-                    //}
-                //}
-            //}
-        //}
+                    // We are closer to the end of our current timeline, so insert items to the end and remove from the beginning
+                    var items = TimelineService.GetItemsForZoomLevel(ZoomLevel, Items.Last().ItemKey, (byte)itemIndexDiffFromCenter, ETimelineGetOption.Post);
+                    for (int i = 0; i < items.Count; i++)
+                    {
+                        Items.Add(items[i]);
+                        Items.RemoveAt(0);
+                    }
+                }
+            }
+        }
 
         /// <summary>
         /// Handle the event of a new image.

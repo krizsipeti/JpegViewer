@@ -172,10 +172,10 @@ namespace JpegViewer.App.UI.Controls
         }
 
         /// <summary>
-        /// Calculates the current position based on the scrollviewer state.
-        /// Current position is the center of the scrollviewer.
+        /// Calculates the current time based on the scrollviewer state.
+        /// Current time is represented by the center position of the scrollviewer.
         /// </summary>
-        private void SetCurrentPosition()
+        private void CalculateCurrentTime()
         {
             // Transform our ScrollViewers visible center point to ItemsRepeater center point
             var center = new Point(scrollViewer.ViewportWidth / 2, scrollViewer.ViewportHeight / 2);
@@ -209,7 +209,7 @@ namespace JpegViewer.App.UI.Controls
                     {
                         double microsPerPixel = item.Duration.TotalMicroseconds / grid.ActualWidth;
                         double currentOffset = pt.X - grid.ActualOffset.X;
-                        ViewModel.CurrentPosition = item.ItemKey.AddMicroseconds(microsPerPixel * currentOffset);
+                        ViewModel.CurrentTime = item.ItemKey.AddMicroseconds(microsPerPixel * currentOffset);
                     }
                 }
             }
@@ -374,9 +374,13 @@ namespace JpegViewer.App.UI.Controls
         /// <param name="e"></param>
         private void scrollViewer_ViewChanged(object sender, ScrollViewerViewChangedEventArgs e)
         {
-            if (!e.IsIntermediate)
+            if (!e.IsIntermediate && !ViewModel.JumpRequest.Active)
             {
-                SetCurrentPosition();
+                CalculateCurrentTime();
+                if (!IsDragging && !ViewModel.RefreshTimelineItemsRequestQueued)
+                {
+                    ViewModel.ScheduleRefreshTimelineItems();
+                }
             }
         }
 
@@ -387,7 +391,14 @@ namespace JpegViewer.App.UI.Controls
         /// <param name="e"></param>
         private void scrollViewer_LayoutUpdated(object sender, object e)
         {
-            SetCurrentPosition();
+            if (!ViewModel.JumpRequest.Active && !IsDragging)
+            {
+                CalculateCurrentTime();
+                if (!ViewModel.RefreshTimelineItemsRequestQueued)
+                {
+                    ViewModel.ScheduleRefreshTimelineItems();
+                }
+            }
         }
 
         /// <summary>

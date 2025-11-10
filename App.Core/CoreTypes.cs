@@ -68,6 +68,16 @@ namespace JpegViewer.App.Core.Types
     }
 
     /// <summary>
+    /// Options how to return timeline items for a date time.
+    /// </summary>
+    public enum ETimelineGetOption
+    {
+        Pre,
+        Post,
+        Both
+    }
+
+    /// <summary>
     /// Small helper used in timeline for jump requests done
     /// on full (re)initialization or when changing among zoom levels.
     /// </summary>

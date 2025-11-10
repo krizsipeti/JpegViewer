@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using ABI.Windows.ApplicationModel.Activation;
 using JpegViewer.App.Core.Interfaces;
 using JpegViewer.App.Core.Models;
 using JpegViewer.App.Core.Types;
@@ -58,30 +57,62 @@ namespace JpegViewer.App.Core.Services
         /// <exception cref="NotImplementedException"></exception>
         public List<TimelineItem> GetItemsForZoomLevel(ETimelineZoomLevel zoomLevel, DateTime dateTime, byte itemBufferSize)
         {
-            return zoomLevel switch
+            return GetItemsForZoomLevel(zoomLevel, dateTime, itemBufferSize, ETimelineGetOption.Both);
+        }
+
+        /// <summary>
+        /// Creates and prepares timeline items based on the given date time and options.
+        /// </summary>
+        /// <param name="zoomLevel"></param>
+        /// <param name="dateTime"></param>
+        /// <param name="itemBufferSize"></param>
+        /// <param name="getOption"></param>
+        /// <returns></returns>
+        public List<TimelineItem> GetItemsForZoomLevel(ETimelineZoomLevel zoomLevel, DateTime dateTime, byte itemBufferSize, ETimelineGetOption getOption)
+        {
+            try
             {
-                ETimelineZoomLevel.Years => GetItemsForYearZoom(dateTime.AddYears(-itemBufferSize * 10), dateTime.AddYears(itemBufferSize * 10)),
-                ETimelineZoomLevel.Months => GetItemsForMonthZoom(dateTime.AddYears(-itemBufferSize), dateTime.AddYears(itemBufferSize)),
-                ETimelineZoomLevel.Days => GetItemsForDayZoom(dateTime.AddMonths(-itemBufferSize), dateTime.AddMonths(itemBufferSize)),
-                ETimelineZoomLevel.Hours => GetItemsForHourZoom(dateTime.AddDays(-itemBufferSize), dateTime.AddDays(itemBufferSize)),
-                ETimelineZoomLevel.Minutes => GetItemsForMinuteZoom(dateTime.AddHours(-itemBufferSize), dateTime.AddHours(itemBufferSize)),
-                ETimelineZoomLevel.Seconds => GetItemsForSecondZoom(dateTime.AddMinutes(-itemBufferSize), dateTime.AddMinutes(itemBufferSize)),
-                _ => new List<TimelineItem>()
-            };
+                return zoomLevel switch
+                {
+                    ETimelineZoomLevel.Years => GetItemsForYearZoom(dateTime.AddYears(getOption == ETimelineGetOption.Post ? 10 : -itemBufferSize * 10),
+                                                                    dateTime.AddYears(getOption == ETimelineGetOption.Pre ? -10 : itemBufferSize * 10)),
+
+                    ETimelineZoomLevel.Months => GetItemsForMonthZoom(dateTime.AddYears(getOption == ETimelineGetOption.Post ? 1 : -itemBufferSize),
+                                                                      dateTime.AddYears(getOption == ETimelineGetOption.Pre ? -1 : itemBufferSize)),
+
+                    ETimelineZoomLevel.Days => GetItemsForDayZoom(dateTime.AddMonths(getOption == ETimelineGetOption.Post ? 1 : -itemBufferSize),
+                                                                  dateTime.AddMonths(getOption == ETimelineGetOption.Pre ? -1 : itemBufferSize)),
+
+                    ETimelineZoomLevel.Hours => GetItemsForHourZoom(dateTime.AddDays(getOption == ETimelineGetOption.Post ? 1 : -itemBufferSize),
+                                                                    dateTime.AddDays(getOption == ETimelineGetOption.Pre ? -1 : itemBufferSize)),
+
+                    ETimelineZoomLevel.Minutes => GetItemsForMinuteZoom(dateTime.AddHours(getOption == ETimelineGetOption.Post ? 1 : -itemBufferSize),
+                                                                        dateTime.AddHours(getOption == ETimelineGetOption.Pre ? -1 : itemBufferSize)),
+
+                    ETimelineZoomLevel.Seconds => GetItemsForSecondZoom(dateTime.AddMinutes(getOption == ETimelineGetOption.Post ? 1 : -itemBufferSize),
+                                                                        dateTime.AddMinutes(getOption == ETimelineGetOption.Pre ? -1 : itemBufferSize)),
+
+                    _ => new List<TimelineItem>()
+                };
+            }
+            catch
+            {
+                return new List<TimelineItem>();
+            }
         }
 
         /// <summary>
         /// Calculates timeline items for year zoom level.
         /// </summary>
-        private List<TimelineItem> GetItemsForYearZoom(DateTime startYear, DateTime endYear)
+        private List<TimelineItem> GetItemsForYearZoom(DateTime start, DateTime end)
         {
             // First group images by year
-            var imagesByYear = ImageService.GetImagesForDateRange(startYear, endYear)
+            var imagesByYear = ImageService.GetImagesForDateRange(start, end)
                 .GroupBy(i => i.DateTaken.Year).ToDictionary(g => g.Key, g => new List<ImageInfo>(g));
 
             // Determine the start and end decade
-            int startDecade = (startYear.Year / 10) * 10;
-            int endDecade = (endYear.Year / 10) * 10;
+            int startDecade = (start.Year / 10) * 10;
+            int endDecade = (end.Year / 10) * 10;
 
             // Allocate list with the calculated number of decades and create the TimelineItems
             var result = new List<TimelineItem>((endDecade - startDecade) / 10 + 1);
