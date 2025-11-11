@@ -1,6 +1,7 @@
 using System;
 using System.Collections.ObjectModel;
 using System.Linq;
+using System.Threading.Tasks;
 using CommunityToolkit.Mvvm.Messaging;
 using JpegViewer.App.Core;
 using JpegViewer.App.Core.Models;
@@ -64,13 +65,18 @@ namespace JpegViewer.App.UI.Controls
         /// </summary>
         private void ItemsRepeater_PointerWheelChanged(object sender, PointerRoutedEventArgs e)
         {
+            if (IsDragging || ViewModel.JumpRequest.Active || ViewModel.RefreshTimelineItemsRequestQueued)
+            {
+                return;
+            }
+
             // First get delta value from mouse wheel
             int delta = e.GetCurrentPoint(null).Properties.MouseWheelDelta; // ±120 per notch
 
             // Zoom in/out if Ctrl is pressed, otherwise scroll horizontally
             if (e.KeyModifiers == VirtualKeyModifiers.Control)
             {
-                ViewModel.ZoomInZoomOut(delta);
+                ViewModel.ScheduleZoomInZoomOut(delta);
             }
             else
             {
@@ -180,26 +186,26 @@ namespace JpegViewer.App.UI.Controls
             // Transform our ScrollViewers visible center point to ItemsRepeater center point
             var center = new Point(scrollViewer.ViewportWidth / 2, scrollViewer.ViewportHeight / 2);
             var pt = scrollViewer.TransformToVisual(itemsRepeater).TransformPoint(center);
-
+            
             // Get the ItemsRepeater collection
             var items = itemsRepeater.ItemsSource as ObservableCollection<TimelineItem>;
             if (items == null)
             {
                 return;
             }
-
+            
             // Enumerate realized elements in ItemsRepeater by TryGetElement using indexes
             for (int i = 0; i < items?.Count; i++)
             {
                 var element = itemsRepeater.TryGetElement(i);
                 if (element == null) continue;
-
+            
                 // Get element bounds in repeater coordinates
                 var transform = element.TransformToVisual(itemsRepeater);
                 var topLeft = transform.TransformPoint(new Point(0, 0));
                 var size = (element as FrameworkElement)?.RenderSize ?? new Size(0, 0);
                 var rect = new Rect(topLeft, size);
-
+            
                 // Hitest the center point to the element rect
                 if (rect.Contains(pt))
                 {
@@ -226,16 +232,16 @@ namespace JpegViewer.App.UI.Controls
             {
                 Grid? baseGrid = args.Element as Grid;
                 if (baseGrid == null) return;
-
+            
                 TimelineItemBaseUnit? baseUnit = baseGrid.Tag as TimelineItemBaseUnit;
                 if (baseUnit == null) return;
-
+            
                 Grid? parentGrid = (baseGrid.Parent as ItemsRepeater)?.Parent as Grid;
                 if (parentGrid == null) return;
                 
                 TimelineItem? parentUnit = parentGrid.Tag as TimelineItem;
                 if (parentUnit == null) return;
-
+            
                 int indexOfBaseUnit = parentUnit.Units.IndexOf(baseUnit);
                 double actualOffset = parentGrid.ActualOffset.X + (baseGrid.ActualWidth * (double)indexOfBaseUnit);
                 double halfViewPort = scrollViewer.ViewportWidth / 2;
@@ -319,7 +325,7 @@ namespace JpegViewer.App.UI.Controls
                     default:
                         break;
                 }
-
+            
                 if (bScrollingDone)
                 {
                     // We have found the element we wanted and scrolled to it
@@ -374,12 +380,16 @@ namespace JpegViewer.App.UI.Controls
         /// <param name="e"></param>
         private void scrollViewer_ViewChanged(object sender, ScrollViewerViewChangedEventArgs e)
         {
-            if (!e.IsIntermediate && !ViewModel.JumpRequest.Active)
+            if (!e.IsIntermediate)
             {
                 CalculateCurrentTime();
-                if (!IsDragging && !ViewModel.RefreshTimelineItemsRequestQueued)
+
+                if (!ViewModel.JumpRequest.Active)
                 {
-                    ViewModel.ScheduleRefreshTimelineItems();
+                    if (!IsDragging && !ViewModel.RefreshTimelineItemsRequestQueued)
+                    {
+                        ViewModel.ScheduleRefreshTimelineItems();
+                    }
                 }
             }
         }
@@ -391,13 +401,9 @@ namespace JpegViewer.App.UI.Controls
         /// <param name="e"></param>
         private void scrollViewer_LayoutUpdated(object sender, object e)
         {
-            if (!ViewModel.JumpRequest.Active && !IsDragging)
+            if (!ViewModel.JumpRequest.Active && !IsDragging && !ViewModel.RefreshTimelineItemsRequestQueued)
             {
                 CalculateCurrentTime();
-                if (!ViewModel.RefreshTimelineItemsRequestQueued)
-                {
-                    ViewModel.ScheduleRefreshTimelineItems();
-                }
             }
         }
 

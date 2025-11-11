@@ -78,6 +78,16 @@ namespace JpegViewer.App.Core.Types
     }
 
     /// <summary>
+    /// Holds the possible zoom action types.
+    /// </summary>
+    public enum ETimelineZoomType
+    {
+        None,
+        ZoomIn,
+        ZoomOut
+    }
+
+    /// <summary>
     /// Small helper used in timeline for jump requests done
     /// on full (re)initialization or when changing among zoom levels.
     /// </summary>

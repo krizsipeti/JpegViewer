@@ -19,7 +19,7 @@ namespace JpegViewer.App.Vmd.Controls
         private ObservableCollection<TimelineItem> _items = new ObservableCollection<TimelineItem>();
         private DateTime _currentTime;
         private double _itemsWidth;
-        private ETimelineZoomLevel _zoomLevel = ETimelineZoomLevel.Seconds;
+        private ETimelineZoomLevel _zoomLevel;
         private readonly object _itemsLock = new object();
 
         /// <summary>
@@ -96,12 +96,30 @@ namespace JpegViewer.App.Vmd.Controls
         /// <summary>
         /// The minimum width allowed for the timeline items.
         /// </summary>
-        public double MinItemsWidth => 100;
+        public double MinItemsWidth => _zoomLevel switch
+        {
+            ETimelineZoomLevel.Years => 100,
+            ETimelineZoomLevel.Months => 100,
+            ETimelineZoomLevel.Days => 32,
+            ETimelineZoomLevel.Hours => 32,
+            ETimelineZoomLevel.Minutes => 32,
+            ETimelineZoomLevel.Seconds => 32,
+            _ => 100
+        };
 
         /// <summary>
         /// The maximum width allowed for the timeline items.
         /// </summary>
-        public double MaxItemsWidth => 200;
+        public double MaxItemsWidth => _zoomLevel switch
+        {
+            ETimelineZoomLevel.Years => 130,
+            ETimelineZoomLevel.Months => 130,
+            ETimelineZoomLevel.Days => 62,
+            ETimelineZoomLevel.Hours => 62,
+            ETimelineZoomLevel.Minutes => 62,
+            ETimelineZoomLevel.Seconds => 62,
+            _ => 130
+        };
 
         /// <summary>
         /// The zoom step applied on mouse wheel action.
@@ -114,13 +132,7 @@ namespace JpegViewer.App.Vmd.Controls
         public ETimelineZoomLevel ZoomLevel
         {
             get => _zoomLevel;
-            set
-            {
-                if (SetProperty(ref _zoomLevel, value))
-                {
-                    ChangeItemsToZoomLevel(value);
-                }
-            }
+            set => SetProperty(ref _zoomLevel, value);
         }
 
         /// <summary>
@@ -146,49 +158,37 @@ namespace JpegViewer.App.Vmd.Controls
             ItemsWidth = MinItemsWidth;
             CurrentTime = DateTime.Now;
             ZoomLevel = ETimelineZoomLevel.Years;
+
+            // Initialize the timeline with items
+            ChangeItemsToZoomLevel(ETimelineZoomType.None);
         }
 
         /// <summary>
-        /// Do zoom in our zoom out based on mouse wheel delta.
+        /// Puts a task to the UI dispatcher to do zoom in/out action.
         /// </summary>
         /// <param name="deltaMouseWheel"></param>
-        public void ZoomInZoomOut(int deltaMouseWheel)
+        public void ScheduleZoomInZoomOut(int deltaMouseWheel)
         {
-            if (JumpRequest.Active)
+            if (RefreshTimelineItemsRequestQueued)
             {
                 return;
             }
 
-            double zoomStep = ZoomStep; // adjust sensitivity
-            double change = (deltaMouseWheel > 0) ? zoomStep : -zoomStep;
-            JumpRequest.JumpTo = CurrentTime;            
+            // Set our guard flag to prevent flood of refreshes
+            RefreshTimelineItemsRequestQueued = true;
 
-            if (ItemsWidth + change > MaxItemsWidth && ZoomLevel < ETimelineZoomLevel.Seconds)
+            // Fire-and-forget debounce task
+            Task.Run(() =>
             {
-                // Do zoom in
-                lock (_itemsLock)
+                // Enqueue to dispatcher — runs after current layout/measure/arrange
+                DispatcherService.Invoke(() =>
                 {
-                    Items.Clear();
-                }
-                JumpRequest.Active = true;
-                ItemsWidth = MinItemsWidth;
-                ZoomLevel++;
-            }
-            else if (ItemsWidth + change < MinItemsWidth && ZoomLevel > ETimelineZoomLevel.Years)
-            {
-                // Do zoom out
-                lock (_itemsLock)
-                {
-                    Items.Clear();
-                }
-                JumpRequest.Active = true;
-                ItemsWidth = MaxItemsWidth;
-                ZoomLevel--;
-            }
-            else
-            {
-                ItemsWidth += change;
-            }
+                    ZoomInZoomOut(deltaMouseWheel);
+
+                    // Clear our guard flag to allow next refresh action
+                    RefreshTimelineItemsRequestQueued = false;
+                });
+            });
         }
 
         /// <summary>
@@ -214,17 +214,58 @@ namespace JpegViewer.App.Vmd.Controls
         }
 
         /// <summary>
-        /// Changes and fills the timeline with new items according to the new zoom level.
+        /// Do zoom in our zoom out based on mouse wheel delta.
         /// </summary>
-        /// <param name="zoomLevel"></param>
-        private void ChangeItemsToZoomLevel(ETimelineZoomLevel zoomLevel)
+        /// <param name="deltaMouseWheel"></param>
+        private void ZoomInZoomOut(int deltaMouseWheel)
         {
-            List<TimelineItem>? itemsList = TimelineService.GetItemsForZoomLevel(zoomLevel, CurrentTime);
+            if (JumpRequest.Active)
+            {
+                return;
+            }
+
+            double zoomStep = ZoomStep; // adjust sensitivity
+            double change = (deltaMouseWheel > 0) ? zoomStep : -zoomStep;
+            JumpRequest.JumpTo = CurrentTime;            
+
+            if (ItemsWidth + change > MaxItemsWidth && ZoomLevel < ETimelineZoomLevel.Seconds)
+            {
+                ChangeItemsToZoomLevel(ETimelineZoomType.ZoomIn);
+            }
+            else if (ItemsWidth + change < MinItemsWidth && ZoomLevel > ETimelineZoomLevel.Years)
+            {
+                ChangeItemsToZoomLevel(ETimelineZoomType.ZoomOut);
+            }
+            else
+            {
+                ItemsWidth += change;
+            }
+        }
+
+        /// <summary>
+        /// Changes and fills the timeline with new items according to the zoom level.
+        /// Checks whether zoom in or zoom out happened and sets the items width.
+        /// </summary>
+        /// <param name="zoomType"></param>
+        private void ChangeItemsToZoomLevel(ETimelineZoomType zoomType)
+        {
+            if (zoomType == ETimelineZoomType.ZoomIn)
+            {
+                ZoomLevel++;
+            }
+            else if (zoomType == ETimelineZoomType.ZoomOut)
+            {
+                ZoomLevel--;
+            }
+
+            List<TimelineItem>? itemsList = TimelineService.GetItemsForZoomLevel(ZoomLevel, JumpRequest.JumpTo);
             if (itemsList != null)
             {
                 lock (_itemsLock)
                 {
                     Items.Clear();
+                    ItemsWidth = (zoomType == ETimelineZoomType.ZoomOut ? MaxItemsWidth : MinItemsWidth);
+                    JumpRequest.Active = true;
                     foreach (var item in itemsList)
                     {
                         Items.Add(item);

@@ -48,8 +48,7 @@
                                ElementPrepared="itemsRepeater_ElementPrepared">
                     <ItemsRepeater.ItemTemplate>
                         <DataTemplate x:DataType="models:TimelineItemBaseUnit">
-                            <Grid MinWidth="{Binding DataContext.MinItemsWidth, ElementName=itemsRepeater}"
-                                  Width="{Binding DataContext.ItemsWidth, ElementName=itemsRepeater}"
+                            <Grid Width="{Binding DataContext.ItemsWidth, ElementName=itemsRepeater}"
                                   Background="{x:Bind support:XamlBindHelpers.GetAlternationColor(support:XamlBindHelpers.ColorBrushA, support:XamlBindHelpers.ColorBrushB)}"
                                   Tag="{x:Bind}">
                                 <Grid.RowDefinitions>
