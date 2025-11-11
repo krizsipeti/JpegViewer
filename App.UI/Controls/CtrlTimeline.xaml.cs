@@ -1,7 +1,6 @@
 using System;
 using System.Collections.ObjectModel;
 using System.Linq;
-using System.Threading.Tasks;
 using CommunityToolkit.Mvvm.Messaging;
 using JpegViewer.App.Core;
 using JpegViewer.App.Core.Models;
@@ -216,6 +215,13 @@ namespace JpegViewer.App.UI.Controls
                         double microsPerPixel = item.Duration.TotalMicroseconds / grid.ActualWidth;
                         double currentOffset = pt.X - grid.ActualOffset.X;
                         ViewModel.CurrentTime = item.ItemKey.AddMicroseconds(microsPerPixel * currentOffset);
+                        ViewModel.CurrentItem = item;
+
+                        int baseUnitIndex = (int)(currentOffset / ViewModel.ItemsWidth);
+                        if (baseUnitIndex >= 0 && baseUnitIndex < item.Units.Count)
+                        {
+                            ViewModel.CurrentBaseUnit = item.Units[baseUnitIndex];
+                        }
                     }
                 }
             }

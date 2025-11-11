@@ -123,6 +123,12 @@ namespace JpegViewer.App.Core.Types
     public record TimelineCurrentPositionChange(DateTime NewPosition, TimelineItem? TimelineItem);
 
     /// <summary>
+    /// Message sent by the timeline when due to position change we are pointing to a new image.
+    /// </summary>
+    /// <param name="ImageInfo"></param>
+    public record CurrentImageChanged(ImageInfo ImageInfo);
+
+    /// <summary>
     /// How image search should be done on a specific folder.
     /// </summary>
     public enum ESubFolderRecursion

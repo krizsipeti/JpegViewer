@@ -4,6 +4,7 @@ using System.Collections.ObjectModel;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using CommunityToolkit.Mvvm.Messaging;
 using JpegViewer.App.Core.Interfaces;
 using JpegViewer.App.Core.Models;
 using JpegViewer.App.Core.Types;
@@ -18,6 +19,8 @@ namespace JpegViewer.App.Vmd.Controls
     {
         private ObservableCollection<TimelineItem> _items = new ObservableCollection<TimelineItem>();
         private DateTime _currentTime;
+        private TimelineItem? _item;
+        private TimelineItemBaseUnit? _baseUnit;
         private double _itemsWidth;
         private ETimelineZoomLevel _zoomLevel;
         private readonly object _itemsLock = new object();
@@ -50,6 +53,34 @@ namespace JpegViewer.App.Vmd.Controls
         {
             get => _currentTime;
             set => SetProperty(ref _currentTime, value);
+        }
+
+        /// <summary>
+        /// Holds the current TimelineItem that belongs to CurrentTime.
+        /// </summary>
+        public TimelineItem? CurrentItem
+        {
+            get => _item;
+            set => SetProperty(ref _item, value);
+        }
+
+        /// <summary>
+        /// Holds the current TimelineItemBaseUnit that belongs to CurrrentTime.
+        /// </summary>
+        public TimelineItemBaseUnit? CurrentBaseUnit
+        {
+            get => _baseUnit;
+            set
+            {
+                if (SetProperty(ref _baseUnit, value))
+                {
+                    var imageInfo = _baseUnit?.Images?.FirstOrDefault();
+                    if (imageInfo != null)
+                    {
+                        WeakReferenceMessenger.Default.Send(new CurrentImageChanged(imageInfo));
+                    }
+                }
+            }
         }
 
         /// <summary>
@@ -361,7 +392,6 @@ namespace JpegViewer.App.Vmd.Controls
                 return;
             }
             
-            //var itemsList = GetItemsForYearZoom(new DateTime(e.DateTaken.Year - 20, 1, 1), new DateTime(e.DateTaken.Year + 20, 1, 1));
             var itemsList = TimelineService.GetItemsForZoomLevel(ZoomLevel, e.DateTaken);
             DispatcherService.Invoke(() =>
             {

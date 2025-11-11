@@ -1,5 +1,7 @@
-﻿using JpegViewer.App.Core.Interfaces;
+﻿using CommunityToolkit.Mvvm.Messaging;
+using JpegViewer.App.Core.Interfaces;
 using JpegViewer.App.Core.Models;
+using JpegViewer.App.Core.Types;
 using Microsoft.UI.Xaml.Media.Imaging;
 
 namespace JpegViewer.App.Vmd.Controls
@@ -7,7 +9,7 @@ namespace JpegViewer.App.Vmd.Controls
     /// <summary>
     /// View model for photo control.
     /// </summary>
-    public class VmdCtrlPhoto : VmdBase
+    public class VmdCtrlPhoto : VmdBase, IRecipient<CurrentImageChanged>
     {
         private BitmapImage? _currentBitmap;
         private ImageInfo? _currentImage;
@@ -23,7 +25,16 @@ namespace JpegViewer.App.Vmd.Controls
         public ImageInfo? CurrentImageInfo
         {
             get => _currentImage;
-            set => SetProperty(ref _currentImage, value);
+            set
+            {
+                if (SetProperty(ref _currentImage, value))
+                {
+                    if (_currentImage != null)
+                    {
+                        DispatcherService.InvokeAsync(async () => CurrentBitmap = await ImageService.GetBimap(_currentImage));
+                    }
+                }
+            }
         }
 
         /// <summary>
@@ -41,28 +52,18 @@ namespace JpegViewer.App.Vmd.Controls
         public VmdCtrlPhoto(IDispatcherService dispatcherService, IImageService imageService) : base(dispatcherService)
         {
             ImageService = imageService;
-            //ImageService.ImageFound += ImageService_ImageFound;
-            ImageService.ImagesLoaded += ImageService_ImagesLoaded;
+
+            // Register this instance to receive messages
+            WeakReferenceMessenger.Default.Register<CurrentImageChanged>(this);
         }
 
         /// <summary>
-        /// Called when image service loads an image.
+        /// Message handler for events sent by timeline when it points to a new image.
         /// </summary>
-        /// <param name="image"></param>
-        private void ImageService_ImageFound(object? sender, ImageInfo image)
+        /// <param name="message"></param>
+        public void Receive(CurrentImageChanged message)
         {
-            //CurrentImageInfo = image;
-        }
-
-        /// <summary>
-        /// Called when image service finished loading images of the selected folder.
-        /// </summary>
-        /// <param name="sender"></param>
-        /// <param name="e">earliest image of the folder</param>
-        /// <exception cref="System.NotImplementedException"></exception>
-        private async void ImageService_ImagesLoaded(object? sender, ImageInfo e)
-        {
-            await DispatcherService.InvokeAsync(async () => CurrentBitmap = await ImageService.GetBimap(e));
+            CurrentImageInfo = message.ImageInfo;
         }
     }
 }
