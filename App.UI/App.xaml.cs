@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Runtime.InteropServices;
 using JpegViewer.App.Core.Interfaces;
 using JpegViewer.App.Core.Services;
 using JpegViewer.App.UI.Services;
@@ -6,6 +7,7 @@ using JpegViewer.App.Vmd;
 using JpegViewer.App.Vmd.Controls;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.UI.Xaml;
+using WinRT.Interop;
 
 namespace JpegViewer.App.UI
 {
@@ -49,6 +51,27 @@ namespace JpegViewer.App.UI
         {
             _window = new MainWindow();
             _window.Activate();
+
+            // Load app icon
+            var hwnd = WindowNative.GetWindowHandle(_window);
+
+            // Path to your .ico in app output folder
+            var exePath = System.AppContext.BaseDirectory;
+            var iconPath = System.IO.Path.Combine(exePath, "Assets", "AppLogo.ico");
+
+            // load large and small icons
+            IntPtr hIconLarge = LoadImage(IntPtr.Zero, iconPath, IMAGE_ICON, 128, 128, LR_LOADFROMFILE);
+            IntPtr hIconSmall = LoadImage(IntPtr.Zero, iconPath, IMAGE_ICON, 64, 64, LR_LOADFROMFILE);
+
+            if (hIconLarge != IntPtr.Zero)
+            {
+                SendMessage(hwnd, WM_SETICON, (IntPtr)ICON_BIG, hIconLarge);
+            }
+
+            if (hIconSmall != IntPtr.Zero)
+            {
+                SendMessage(hwnd, WM_SETICON, (IntPtr)ICON_SMALL, hIconSmall);
+            }
         }
 
         /// <summary>
@@ -63,5 +86,21 @@ namespace JpegViewer.App.UI
 
             return service;
         }
+
+        #region Imports
+
+        [DllImport("user32.dll", SetLastError = true)]
+        static extern IntPtr LoadImage(IntPtr hinst, string lpszName, uint uType, int cx, int cy, uint fuLoad);
+
+        [DllImport("user32.dll", SetLastError = true)]
+        static extern IntPtr SendMessage(IntPtr hWnd, uint Msg, IntPtr wParam, IntPtr lParam);
+
+        const uint IMAGE_ICON = 1;
+        const uint LR_LOADFROMFILE = 0x00000010;
+        const uint WM_SETICON = 0x0080;
+        const int ICON_SMALL = 0;
+        const int ICON_BIG = 1;
+
+        #endregion Imports
     }
 }
