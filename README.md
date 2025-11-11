@@ -10,4 +10,4 @@ JpegViewer is a lightweight desktop application that displays JPEG images from a
 - You can move the timeline left - right by mouse wheel or by simply dragging it or with the scrollbar on the bottom.
 - You can zoom in/out the timeline by Ctrl + mouse wheel. Note that this functionality can be buggy. There are 6 zoom levels: years, months, days, hours, minutes and seconds.
 - If timeline's center points to an image than that image is shown in the top view. (In case of image groups the first one.) Last shown image stays in view until a new one is pointed.
-- Top-right menu is not functioning. It's still just an example, where later the main menu can be implemented.
+- Top-right menu is not functioning. It's still just an example, where later the main menu can be implemented. Also bottom buttons are doing nothing yet.
